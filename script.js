@@ -3,9 +3,21 @@ gsap.registerPlugin(ScrollTrigger);
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', () => {
+    // Always start at top on reload (disable browser scroll restoration)
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+
     initHeader();
     initHeroSection();
     initAboutSection();
+});
+
+// Some browsers restore scroll position after DOMContentLoaded (bfcache/pageshow).
+// This ensures we still reset to the top.
+window.addEventListener('pageshow', () => {
+    window.scrollTo(0, 0);
 });
 
 // Header Animations
@@ -66,21 +78,29 @@ function initHeader() {
         lastScroll = currentScroll;
     });
 
-    // Smooth scroll for navigation links
+    // Smooth scroll for navigation links (no ScrollToPlugin required)
+    // This site uses a scroll-driven transition rather than real section offsets,
+    // so we map anchors to ScrollTrigger progress positions.
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            if (!href) return;
+
+            const st = ScrollTrigger.getById('homeToAbout');
+            if (!st) return;
+
+            const progressMap = {
+                '#home': 0,
+                '#about': 0.65,
+                '#projects': 0.85,
+                '#contact': 1
+            };
+
+            if (!(href in progressMap)) return;
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                gsap.to(window, {
-                    duration: 1,
-                    scrollTo: {
-                        y: target,
-                        offsetY: 80
-                    },
-                    ease: 'power3.inOut'
-                });
-            }
+
+            const targetY = st.start + (st.end - st.start) * progressMap[href];
+            window.scrollTo({ top: targetY, behavior: 'smooth' });
         });
     });
 }
@@ -147,6 +167,26 @@ function animateLogo() {
 
 // Hero Section Animations
 function initHeroSection() {
+    // Shape and color configurations
+    const shapeConfigs = [
+        { shape: 'square', colors: ['#2ECC71', '#27AE60'] },
+        { shape: 'circle', colors: ['#5DADE2', '#3498DB'] },
+        { shape: 'square', colors: ['#A855F7', '#9333EA'] },
+        { shape: 'circle', colors: ['#EC4899', '#DB2777'] },
+        { shape: 'square', colors: ['#F1C40F', '#F39C12'] },
+        { shape: 'circle', colors: ['#FF7F50', '#FF6347'] },
+        { shape: 'square', colors: ['#10B981', '#059669'] },
+        { shape: 'circle', colors: ['#F59E0B', '#D97706'] }
+    ];
+
+    // Set initial unique colors for each shape
+    const containers = document.querySelectorAll('.shape-container');
+    containers.forEach((container, i) => {
+        const digitShape = container.querySelector('.digit-shape');
+        const config = shapeConfigs[i % shapeConfigs.length];
+        digitShape.style.background = `linear-gradient(135deg, ${config.colors[0]}, ${config.colors[1]})`;
+    });
+
     // Animate logo shapes with stagger
     gsap.from('.shape-container', {
         scale: 0,
@@ -176,27 +216,22 @@ function initHeroSection() {
         delay: 1.5
     });
 
-    // Shape and color configurations
-    const shapeConfigs = [
-        { shape: 'square', colors: ['#2ECC71', '#27AE60'] },
-        { shape: 'circle', colors: ['#5DADE2', '#3498DB'] },
-        { shape: 'square', colors: ['#A855F7', '#9333EA'] },
-        { shape: 'circle', colors: ['#EC4899', '#DB2777'] },
-        { shape: 'square', colors: ['#F1C40F', '#F39C12'] },
-        { shape: 'circle', colors: ['#FF7F50', '#FF6347'] },
-        { shape: 'square', colors: ['#10B981', '#059669'] },
-        { shape: 'circle', colors: ['#F59E0B', '#D97706'] }
-    ];
-
     // Function to morph shapes
     function morphShape(container, shapeConfig) {
         const digitShape = container.querySelector('.digit-shape');
+
+        // If a previous morph timeline exists, kill it so we don't stack popouts
+        if (digitShape.__morphTl) {
+            digitShape.__morphTl.kill();
+            digitShape.__morphTl = null;
+        }
         
         // Kill any ongoing animations on this specific shape
         gsap.killTweensOf(digitShape);
         
         // Pop out animation
         const tl = gsap.timeline();
+        digitShape.__morphTl = tl;
         
         tl.to(digitShape, {
             scale: 0.3,
@@ -223,6 +258,9 @@ function initHeroSection() {
         .add(() => {
             // Restart the continuous float animation for this shape
             restartFloatAnimation(container);
+        })
+        .eventCallback('onComplete', () => {
+            if (digitShape.__morphTl === tl) digitShape.__morphTl = null;
         });
     }
     
@@ -253,28 +291,70 @@ function initHeroSection() {
     }
 
     // Cycle shapes every 2 seconds (pop-out / pop-in)
-    let currentIndex = 0;
+    // Use a run id so any pending timeouts don't fire after we stop morphing.
+    let morphRunId = 0;
 
-    function tickMorph() {
+    function randIndex(max) {
+        return Math.floor(Math.random() * max);
+    }
+
+    function tickMorph(runId) {
+        if (runId !== morphRunId) return;
         const containers = document.querySelectorAll('.shape-container');
+        
+        // Get array of available config indices
+        const availableIndices = Array.from({ length: shapeConfigs.length }, (_, i) => i);
+        // Shuffle the array to randomize
+        for (let i = availableIndices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [availableIndices[i], availableIndices[j]] = [availableIndices[j], availableIndices[i]];
+        }
+        
         containers.forEach((container, i) => {
-            const configIndex = (currentIndex + i) % shapeConfigs.length;
+            // Use different config for each shape (ensure no duplicates)
+            const configIndex = availableIndices[i % availableIndices.length];
             setTimeout(() => {
+                if (runId !== morphRunId) return;
                 morphShape(container, shapeConfigs[configIndex]);
             }, i * 150);
         });
-        currentIndex = (currentIndex + 1) % shapeConfigs.length;
     }
 
     function startMorph() {
         if (window.shapeMorphInterval) return;
-        window.shapeMorphInterval = setInterval(tickMorph, 2000);
+        morphRunId += 1;
+        const runId = morphRunId;
+        window.shapeMorphInterval = setInterval(() => tickMorph(runId), 2000);
     }
 
     function stopMorph() {
-        if (!window.shapeMorphInterval) return;
-        clearInterval(window.shapeMorphInterval);
-        window.shapeMorphInterval = null;
+        // Invalidate any pending timeouts for the current cycle
+        morphRunId += 1;
+        if (window.shapeMorphInterval) {
+            clearInterval(window.shapeMorphInterval);
+            window.shapeMorphInterval = null;
+        }
+
+        // Kill any in-flight morph timelines/tweens so a mid-popout scroll doesn't glitch.
+        document.querySelectorAll('.shape-container').forEach((container) => {
+            const digitShape = container.querySelector('.digit-shape');
+            const digit = container.querySelector('.shape-digit');
+            const icon = container.querySelector('.shape-icon');
+
+            if (digitShape && digitShape.__morphTl) {
+                digitShape.__morphTl.kill();
+                digitShape.__morphTl = null;
+            }
+
+            if (digitShape) gsap.killTweensOf(digitShape);
+            if (digit) gsap.killTweensOf(digit);
+            if (icon) gsap.killTweensOf(icon);
+
+            // Reset to stable home state; scroll timeline will take over from here.
+            if (digitShape) gsap.set(digitShape, { scale: 1, opacity: 1 });
+            if (digit) gsap.set(digit, { autoAlpha: 1 });
+            if (icon) gsap.set(icon, { autoAlpha: 0, scale: 0.6, transformOrigin: '50% 50%' });
+        });
     }
 
     // Expose so scroll section can pause/resume
@@ -323,6 +403,41 @@ function initHeroSection() {
         yoyo: true,
         ease: 'sine.inOut',
         delay: 0.9
+    });
+
+    // Add continuous floating animation to shape-containers using ticker
+    const floatData = [
+        { selector: '.shape-container.shape-1', amplitude: 8, speed: 3.2, offset: 0 },
+        { selector: '.shape-container.shape-2', amplitude: -8, speed: 3.5, offset: 0.4 },
+        { selector: '.shape-container.shape-3', amplitude: 8, speed: 2.9, offset: 0.8 },
+        { selector: '.shape-container.shape-4', amplitude: -8, speed: 3.3, offset: 1.2 }
+    ];
+
+    const floatElements = floatData.map(data => ({
+        element: document.querySelector(data.selector),
+        amplitude: data.amplitude,
+        speed: data.speed,
+        offset: data.offset,
+        startTime: Date.now()
+    }));
+
+    // Use GSAP ticker for continuous floating
+    gsap.ticker.add(() => {
+        const currentTime = (Date.now() / 1000);
+        
+        // Get scroll progress to reduce floating in about section
+        const homeToAboutTrigger = ScrollTrigger.getById('homeToAbout');
+        const scrollProgress = homeToAboutTrigger ? homeToAboutTrigger.progress : 0;
+        
+        // Reduce amplitude as we scroll into about section (after 30% progress)
+        const amplitudeScale = scrollProgress > 0.3 ? Math.max(0.2, 1 - (scrollProgress - 0.3) * 1.4) : 1;
+        
+        floatElements.forEach(({ element, amplitude, speed, offset }) => {
+            if (!element) return;
+            const phase = ((currentTime + offset) / speed) * Math.PI * 2;
+            const floatY = Math.sin(phase) * amplitude * amplitudeScale *0.5;
+            gsap.set(element, { yPercent: floatY });
+        });
     });
 
     // Cursor tracking for 3D tilt effect on PRODUCTIONS text
@@ -379,11 +494,16 @@ function initHeroSection() {
 
 // About Section with Scroll Animations
 function initAboutSection() {
-    const homeSection = document.querySelector('.home-section');
     const aboutSection = document.querySelector('.about-section');
     const aboutTitle = document.querySelector('.about-title');
     const aboutText = document.querySelector('.about-text');
-    const shapes = document.querySelectorAll('.shape-container');
+    const shapes = Array.from(document.querySelectorAll('.shape-container'));
+    const shapeEls = shapes.map((shape) => ({
+        shape,
+        digitShape: shape.querySelector('.digit-shape'),
+        digit: shape.querySelector('.shape-digit'),
+        icon: shape.querySelector('.shape-icon')
+    }));
     const productionsText = document.querySelector('.productions-text');
     const tagline = document.querySelector('.tagline');
     
@@ -453,28 +573,42 @@ function initAboutSection() {
         // Ensure consistent starting state
         // NOTE: Avoid visibility:hidden here because Safari can report zeroed rects
         // for descendants when an ancestor is visibility:hidden.
-        gsap.set(aboutSection, { opacity: 0, visibility: 'visible', backgroundColor: 'rgba(13, 13, 13, 0.88)' });
-        gsap.set(aboutTitle, { color: '#FFFFFF' });
-        gsap.set(aboutText, { color: '#B0B0B0' });
+        gsap.set(aboutSection, { opacity: 0, visibility: 'visible', backgroundColor: '#FFFFFF' });
+        gsap.set(aboutTitle, { color: '#0D0D0D' });
+        gsap.set(getImpactLines(), { color: '#0D0D0D' });
+        gsap.set(aboutText, { color: '#0D0D0D' });
         gsap.set([productionsText, tagline], { clearProps: 'transform', autoAlpha: 1 });
 
-        shapes.forEach(shape => {
-            const digitShape = shape.querySelector('.digit-shape');
-            const digit = shape.querySelector('.shape-digit');
-            const icon = shape.querySelector('.shape-icon');
-
+        shapeEls.forEach(({ digitShape, digit, icon }) => {
             gsap.set(digitShape, { scale: 1 });
             gsap.set(digit, { autoAlpha: 1 });
-            gsap.set(icon, { autoAlpha: 0, scale: 0.6, transformOrigin: '50% 50%' });
+            gsap.set(icon, { autoAlpha: 0, scale: 0.6 });
         });
+
+        // Reset shape-container scale to 1 at start
+        shapes.forEach(shape => gsap.set(shape, { scale: 1 }));
 
         // Precompute deltas at rest
         // Force About to be layout-visible during measurements to prevent zeroed rects.
         const iconTargets = getIconTargets();
+
+        // Size icon targets to match the computed line-height of the About description.
+        // This makes the landed icons feel "inline" with the text.
+        const aboutTextStyle = window.getComputedStyle(aboutText);
+        const fontSize = parseFloat(aboutTextStyle.fontSize) || 32;
+        let lineHeight = parseFloat(aboutTextStyle.lineHeight);
+        if (!Number.isFinite(lineHeight)) {
+            lineHeight = fontSize * 1.55;
+        }
+        const iconSize = Math.round(lineHeight * 1.4); // Increase icon size by 40%
+
         const prevAboutOpacity = gsap.getProperty(aboutSection, 'opacity');
         gsap.set(aboutSection, { opacity: 1 });
+        
+        // Set icon-target containers to final size BEFORE measuring so scale calculations are accurate
+        gsap.set(iconTargets, { width: iconSize, height: iconSize });
 
-        const deltas = Array.from(shapes).map((shape, index) => {
+        const deltas = shapeEls.map(({ shape, digitShape }, index) => {
             const iconTarget = iconTargets[index];
             if (!iconTarget) return null;
 
@@ -487,17 +621,21 @@ function initAboutSection() {
 
             // If the target is still invalid, fall back to no movement (prevents corner jump).
             if (!iconRect.width || !iconRect.height) {
-                return { dx: 0, dy: 0, targetScale: 0.12 };
+                return { dx: 0, dy: 0, targetScale: 0.12, containerScale: 0.29 };
             }
             const dx = (iconRect.left + iconRect.width / 2) - (shapeRect.left + shapeRect.width / 2);
             const dy = (iconRect.top + iconRect.height / 2) - (shapeRect.top + shapeRect.height / 2);
 
             // Scale digit-shape down to match target size
-            const digitShape = shape.querySelector('.digit-shape');
             const digitRect = digitShape.getBoundingClientRect();
-            const targetScale = iconRect.width && digitRect.width ? (iconRect.width / digitRect.width) : 0.133;
+            const iconSizePx = Math.min(iconRect.width || 0, iconRect.height || 0);
+            const targetScale = iconSizePx && digitRect.width ? (iconSizePx / digitRect.width) : 0.133;
 
-            return { dx, dy, targetScale: Math.max(0.08, Math.min(0.2, targetScale)) };
+            // Calculate scale for shape-container to match line height (lineHeight = iconSize due to matching above)
+            // shape-container wraps digit-shape (180px), so to match iconSize we need: 180 * containerScale ≈ iconSize
+            const containerScale = iconSize / 180;
+
+            return { dx, dy, targetScale: Math.max(0.08, Math.min(0.35, targetScale)), containerScale };
         });
 
         gsap.set(aboutSection, { opacity: prevAboutOpacity });
@@ -517,45 +655,62 @@ function initAboutSection() {
                 end: '+=200%',
                 scrub: true,
                 onUpdate: (self) => {
-                    // Pause pop animation while scrubbing; resume only at very top
-                    if (self.progress > 0.001) {
+                    // Pause pop animation while scrubbing; resume only at very top.
+                    // IMPORTANT: don't kill digit-shape tweens here (that would cancel the scroll-morph scaling).
+                    const shouldPauseMorph = self.progress > 0.001;
+                    if (shouldPauseMorph && !tl._morphPaused) {
+                        tl._morphPaused = true;
                         window.__heroMorph?.stop?.();
-                    } else {
+                    } else if (!shouldPauseMorph && tl._morphPaused) {
+                        tl._morphPaused = false;
                         window.__heroMorph?.start?.();
+                    }
+
+                    // Hard cut (no smooth background transition) between Home and About.
+                    const shouldShowAbout = self.progress >= 0.22;
+                    if (shouldShowAbout !== tl._isAboutShown) {
+                        tl._isAboutShown = shouldShowAbout;
+                        if (shouldShowAbout) {
+                            gsap.set(aboutSection, { opacity: 1, backgroundColor: '#FFFFFF' });
+
+                            // Once About is shown, ensure digits are hidden and icons are visible.
+                            // IMPORTANT: Don't override scale here - let the timeline tween handle smooth scaling.
+                            shapeEls.forEach(({ digit, icon }) => {
+                                gsap.set(digit, { autoAlpha: 0 });
+                                // IMPORTANT: .digit-shape uses a huge font-size (180px). Ensure icons
+                                // don't inherit that when About is shown.
+                                gsap.set(icon, { autoAlpha: 1, scale: 1, fontSize: iconSize });
+                            });
+                        } else {
+                            gsap.set(aboutSection, { opacity: 0, backgroundColor: '#FFFFFF' });
+
+                            // Reset to home visuals
+                            shapeEls.forEach(({ digit, icon }) => {
+                                gsap.set(digit, { autoAlpha: 1 });
+                                gsap.set(icon, { autoAlpha: 0, scale: 0.6, clearProps: 'fontSize' });
+                            });
+                        }
                     }
                 }
             }
         });
 
-        // Text swap + About dissolve
+        // Text swap
         tl.to(productionsText, { autoAlpha: 0, y: -30, duration: 0.6, ease: 'none' }, 0);
         tl.to(tagline, { autoAlpha: 0, y: -20, duration: 0.6, ease: 'none' }, 0);
 
-        // About layer fades in slowly (dissolve)
-        tl.to(aboutSection, { opacity: 1, duration: 1.2, ease: 'none' }, 0.05);
-
-        // Background color dissolves from dark -> light (solid colors, partial opacity)
-        tl.to(aboutSection, { backgroundColor: 'rgba(255, 255, 255, 0.88)', duration: 1.2, ease: 'none' }, 0.12);
-
-        // Text colors dissolve in sync for readability
-        tl.to(aboutTitle, { color: '#0D0D0D', duration: 1.2, ease: 'none' }, 0.12);
-        tl.to(getImpactLines(), { color: '#0D0D0D', duration: 1.2, ease: 'none' }, 0.12);
-        tl.to(aboutText, { color: 'rgba(13, 13, 13, 0.72)', duration: 1.2, ease: 'none' }, 0.12);
-
-        // Shapes to targets
-        shapes.forEach((shape, index) => {
+        // Shapes to targets - scale both container and digit-shape to match line height
+        shapeEls.forEach(({ shape, digitShape, digit, icon }, index) => {
             const d = deltas[index];
             if (!d) return;
 
-            const digitShape = shape.querySelector('.digit-shape');
-            const digit = shape.querySelector('.shape-digit');
-            const icon = shape.querySelector('.shape-icon');
-
             // Slight eased feel while still landing exactly on target
-            tl.to(shape, { x: d.dx, y: d.dy, duration: 1.2, ease: 'power1.inOut' }, 0);
+            tl.to(shape, { x: d.dx, y: d.dy, scale: d.containerScale, duration: 1.2, ease: 'power1.inOut' }, 0);
             tl.to(digitShape, { scale: d.targetScale, duration: 1.2, ease: 'power1.inOut' }, 0);
             tl.to(digit, { autoAlpha: 0, duration: 0.35, ease: 'none' }, 0.15);
             tl.to(icon, { autoAlpha: 1, scale: 1, duration: 0.45, ease: 'none' }, 0.25);
+            // Ensure icon glyph size matches About text line-height instead of inheriting 180px from .digit-shape
+            tl.to(icon, { fontSize: iconSize, duration: 1.2, ease: 'power1.inOut' }, 0);
         });
 
         // Words slide in
@@ -564,22 +719,20 @@ function initAboutSection() {
         return tl;
     }
 
+    function rebuildHomeToAbout() {
+        buildHomeToAboutTimeline();
+        ScrollTrigger.refresh();
+        ScrollTrigger.update();
+    }
+
     // Build once after layout settles
     const ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
     ready.then(() => {
         requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                buildHomeToAboutTimeline();
-                ScrollTrigger.refresh();
-                ScrollTrigger.update();
-            });
+            requestAnimationFrame(rebuildHomeToAbout);
         });
     });
 
     // Rebuild on resize (targets move)
-    window.addEventListener('resize', () => {
-        buildHomeToAboutTimeline();
-        ScrollTrigger.refresh();
-        ScrollTrigger.update();
-    });
+    window.addEventListener('resize', rebuildHomeToAbout);
 }

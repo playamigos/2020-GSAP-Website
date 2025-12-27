@@ -7,17 +7,9 @@
 
 :root {
     --bg-dark: #0D0D0D;
-    --bg-darker: #0A0A0A;
     --text-primary: #FFFFFF;
     --text-secondary: #B0B0B0;
     --accent-color: #FF6B35;
-    --accent-hover: #FF8C5A;
-    --color-1: #FF6B35;
-    --color-2: #A855F7;
-    --color-3: #84CC16;
-    --color-4: #FFFFFF;
-    --color-5: #C4B5FD;
-    --color-6: #FDE047;
     --header-height: 60px;
 }
 
@@ -27,11 +19,6 @@ body {
     color: var(--text-primary);
     overflow-x: hidden;
     line-height: 1.6;
-    font-optical-sizing: auto;
-}
-
-.logo-font {
-    font-family: "Hanken Grotesk", sans-serif;
     font-optical-sizing: auto;
 }
 
@@ -73,8 +60,6 @@ body {
     font-weight: 900;
     letter-spacing: -2px;
     gap: 2px;
-    font-family: "Hanken Grotesk", sans-serif;
-    font-optical-sizing: auto;
 }
 
 .logo-digit {
@@ -85,18 +70,12 @@ body {
     text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
 }
 
-.logo-digit.digit-1 {
-    transform: translateY(-1px);
-}
-
+.logo-digit.digit-1,
 .logo-digit.digit-2 {
     transform: translateY(-1px);
 }
 
-.logo-digit.digit-3 {
-    transform: translateY(1px);
-}
-
+.logo-digit.digit-3,
 .logo-digit.digit-4 {
     transform: translateY(1px);
 }
@@ -128,8 +107,6 @@ body {
     align-items: center;
     transition: color 0.3s ease;
     position: relative;
-    font-family: "Hanken Grotesk", sans-serif;
-    font-optical-sizing: auto;
 }
 
 .menu-link::after {
@@ -271,6 +248,7 @@ main {
     position: relative;
     overflow: visible;
     border: 1px solid #0D0D0D;
+    font-size: 180px;
 }
 
 .shape-digit {
@@ -278,12 +256,9 @@ main {
     font-weight: 900;
     color: #1A1A1A;
     line-height: 1;
-    font-family: "Hanken Grotesk", sans-serif;
-    font-optical-sizing: auto;
     z-index: 2;
     position: relative;
     -webkit-text-stroke: 5px #1A1A1A;
-    text-stroke: 5px #1A1A1A;
     font-stretch: condensed;
 }
 
@@ -306,16 +281,12 @@ main {
     letter-spacing: 2px;
     margin: 0;
     line-height: 1;
-    font-family: "Hanken Grotesk", sans-serif;
-    font-optical-sizing: auto;
     perspective: 1000px;
     transform-style: preserve-3d;
 }
 
 /* Tagline */
 .tagline {
-    font-family: "Hanken Grotesk", sans-serif;
-    font-optical-sizing: auto;
     font-size: 16px;
     font-weight: 400;
     color: var(--text-secondary);
@@ -331,7 +302,7 @@ main {
     width: 100%;
     height: 100vh;
     z-index: 50;
-    background-color: var(--bg-dark);
+    background-color: #FFFFFF;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -353,18 +324,16 @@ main {
 .about-title {
     font-size: 56px;
     font-weight: 900;
-    color: var(--text-primary);
+    color: #0D0D0D;
     margin-bottom: 18px;
     line-height: 1.15;
-    font-family: "Hanken Grotesk", sans-serif;
 }
 
 .about-text {
     font-size: 32px;
-    font-weight: 500;
-    color: var(--text-secondary);
+    font-weight: 900;
+    color: #0D0D0D;
     line-height: 1.55;
-    font-family: "Hanken Grotesk", sans-serif;
 }
 
 .impact-line {
@@ -373,54 +342,41 @@ main {
     font-size: 56px;
     font-weight: 900;
     line-height: 1.1;
+    color: #0D0D0D;
 }
 
 .highlight-pill {
-    display: inline-block;
-    padding: 0.08em 0.38em;
-    border-radius: 999px;
-    background: linear-gradient(
-        90deg,
-        var(--color-1),
-        var(--color-2),
-        var(--color-3),
-        var(--color-6),
-        var(--color-5),
-        var(--color-1)
-    );
-    background-size: 300% 100%;
-    animation: pill-shift 4s linear infinite;
-    color: #0D0D0D;
-    -webkit-box-decoration-break: clone;
-    box-decoration-break: clone;
-}
-
-@keyframes pill-shift {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 100% 50%; }
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    color: inherit;
 }
 
 .icon-target {
     display: inline-block;
-    width: 28px;
-    height: 28px;
+    width: 52px;
+    height: 52px;
     vertical-align: middle;
-    margin: 0 4px;
+    margin: 0 6px;
     position: relative;
 }
 
 .shape-icon {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     width: auto;
     height: auto;
     opacity: 0;
     z-index: 2;
     color: #000;
-    font-size: 92px;
+    font-size: 1.4em;
     line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .word {
@@ -459,6 +415,7 @@ main {
     .digit-shape {
         width: 120px;
         height: 120px;
+        font-size: 120px;
     }
 
     .shape-digit {
@@ -496,6 +453,7 @@ main {
     .digit-shape {
         width: 85px;
         height: 85px;
+        font-size: 85px;
     }
 
     .shape-digit {
@@ -527,8 +485,8 @@ main {
     }
 
     .icon-target {
-        width: 28px;
-        height: 28px;
+        width: 52px;
+        height: 52px;
     }
 
     .shape-icon {
