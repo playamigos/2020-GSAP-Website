@@ -5,6 +5,7 @@ gsap.registerPlugin(ScrollTrigger);
 document.addEventListener('DOMContentLoaded', () => {
     initHeader();
     initHeroSection();
+    initAboutSection();
 });
 
 // Header Animations
@@ -219,7 +220,7 @@ function initHeroSection() {
             duration: 0.45,
             ease: 'back.out(1.7)'
         })
-        .then(() => {
+        .add(() => {
             // Restart the continuous float animation for this shape
             restartFloatAnimation(container);
         });
@@ -251,9 +252,10 @@ function initHeroSection() {
         }
     }
 
-    // Cycle shapes every 2 seconds
+    // Cycle shapes every 2 seconds (pop-out / pop-in)
     let currentIndex = 0;
-    setInterval(() => {
+
+    function tickMorph() {
         const containers = document.querySelectorAll('.shape-container');
         containers.forEach((container, i) => {
             const configIndex = (currentIndex + i) % shapeConfigs.length;
@@ -262,7 +264,26 @@ function initHeroSection() {
             }, i * 150);
         });
         currentIndex = (currentIndex + 1) % shapeConfigs.length;
-    }, 2000);
+    }
+
+    function startMorph() {
+        if (window.shapeMorphInterval) return;
+        window.shapeMorphInterval = setInterval(tickMorph, 2000);
+    }
+
+    function stopMorph() {
+        if (!window.shapeMorphInterval) return;
+        clearInterval(window.shapeMorphInterval);
+        window.shapeMorphInterval = null;
+    }
+
+    // Expose so scroll section can pause/resume
+    window.__heroMorph = {
+        start: startMorph,
+        stop: stopMorph
+    };
+
+    startMorph();
 
     // Continuous subtle animation for shapes
     gsap.to('.shape-1 .digit-shape', {
@@ -353,5 +374,212 @@ function initHeroSection() {
                 ease: 'power2.out'
             });
         });
+    });
+}
+
+// About Section with Scroll Animations
+function initAboutSection() {
+    const homeSection = document.querySelector('.home-section');
+    const aboutSection = document.querySelector('.about-section');
+    const aboutTitle = document.querySelector('.about-title');
+    const aboutText = document.querySelector('.about-text');
+    const shapes = document.querySelectorAll('.shape-container');
+    const productionsText = document.querySelector('.productions-text');
+    const tagline = document.querySelector('.tagline');
+    
+    // Function to wrap text nodes in spans while preserving HTML and spacing
+    function wrapTextNodes(element) {
+        const walker = document.createTreeWalker(
+            element,
+            NodeFilter.SHOW_TEXT,
+            null,
+            false
+        );
+        
+        const textNodes = [];
+        let node;
+        while (node = walker.nextNode()) {
+            textNodes.push(node);
+        }
+        
+        let wordIndex = 0;
+        textNodes.forEach(textNode => {
+            const text = textNode.textContent;
+            if (!text.trim()) return; // Skip empty text nodes
+            
+            // Split by spaces but keep the spaces
+            const parts = text.split(/( +)/);
+            const fragment = document.createDocumentFragment();
+            
+            parts.forEach(part => {
+                if (part.trim().length > 0) {
+                    // It's a word
+                    const span = document.createElement('span');
+                    span.className = `word word-${wordIndex % 2 === 0 ? 'left' : 'right'}`;
+                    span.textContent = part;
+                    fragment.appendChild(span);
+                    wordIndex++;
+                } else if (part.length > 0) {
+                    // It's space(s)
+                    fragment.appendChild(document.createTextNode(part));
+                }
+            });
+            
+            textNode.replaceWith(fragment);
+        });
+    }
+    
+    // Normalize whitespace first so wrapped words don't inherit indentation/newlines
+    aboutTitle.innerHTML = aboutTitle.innerHTML.replace(/\s+/g, ' ').trim();
+    aboutText.innerHTML = aboutText.innerHTML.replace(/\s+/g, ' ').trim();
+
+    wrapTextNodes(aboutTitle);
+    wrapTextNodes(aboutText);
+
+    // IMPORTANT: icon targets are recreated when we rewrite innerHTML / wrap text.
+    // Never cache them before the DOM changes.
+    const getIconTargets = () => Array.from(document.querySelectorAll('.icon-target'));
+    const getImpactLines = () => Array.from(aboutSection.querySelectorAll('.impact-line'));
+    
+    // Build a single scrubbed timeline (precompute offsets once so shapes land exactly on targets)
+    function buildHomeToAboutTimeline() {
+        // Kill existing triggers/tweens from previous builds
+        const existing = ScrollTrigger.getById('homeToAbout');
+        if (existing) existing.kill();
+
+        gsap.killTweensOf(shapes);
+        shapes.forEach(shape => gsap.set(shape, { x: 0, y: 0 }));
+
+        // Ensure consistent starting state
+        // NOTE: Avoid visibility:hidden here because Safari can report zeroed rects
+        // for descendants when an ancestor is visibility:hidden.
+        gsap.set(aboutSection, { opacity: 0, visibility: 'visible', backgroundColor: 'rgba(13, 13, 13, 0.88)' });
+        gsap.set(aboutTitle, { color: '#FFFFFF' });
+        gsap.set(aboutText, { color: '#B0B0B0' });
+        gsap.set([productionsText, tagline], { clearProps: 'transform', autoAlpha: 1 });
+
+        shapes.forEach(shape => {
+            const digitShape = shape.querySelector('.digit-shape');
+            const digit = shape.querySelector('.shape-digit');
+            const icon = shape.querySelector('.shape-icon');
+
+            gsap.set(digitShape, { scale: 1 });
+            gsap.set(digit, { autoAlpha: 1 });
+            gsap.set(icon, { autoAlpha: 0, scale: 0.6, transformOrigin: '50% 50%' });
+        });
+
+        // Precompute deltas at rest
+        // Force About to be layout-visible during measurements to prevent zeroed rects.
+        const iconTargets = getIconTargets();
+        const prevAboutOpacity = gsap.getProperty(aboutSection, 'opacity');
+        gsap.set(aboutSection, { opacity: 1 });
+
+        const deltas = Array.from(shapes).map((shape, index) => {
+            const iconTarget = iconTargets[index];
+            if (!iconTarget) return null;
+
+            const shapeRect = shape.getBoundingClientRect();
+            let iconRect = iconTarget.getBoundingClientRect();
+            if (!iconRect.width || !iconRect.height) {
+                const rects = iconTarget.getClientRects();
+                if (rects && rects.length) iconRect = rects[0];
+            }
+
+            // If the target is still invalid, fall back to no movement (prevents corner jump).
+            if (!iconRect.width || !iconRect.height) {
+                return { dx: 0, dy: 0, targetScale: 0.12 };
+            }
+            const dx = (iconRect.left + iconRect.width / 2) - (shapeRect.left + shapeRect.width / 2);
+            const dy = (iconRect.top + iconRect.height / 2) - (shapeRect.top + shapeRect.height / 2);
+
+            // Scale digit-shape down to match target size
+            const digitShape = shape.querySelector('.digit-shape');
+            const digitRect = digitShape.getBoundingClientRect();
+            const targetScale = iconRect.width && digitRect.width ? (iconRect.width / digitRect.width) : 0.133;
+
+            return { dx, dy, targetScale: Math.max(0.08, Math.min(0.2, targetScale)) };
+        });
+
+        gsap.set(aboutSection, { opacity: prevAboutOpacity });
+
+        // Set initial offsets for word slides
+        const words = aboutSection.querySelectorAll('.word');
+        words.forEach(word => {
+            const isLeft = word.classList.contains('word-left');
+            gsap.set(word, { x: isLeft ? -90 : 90, autoAlpha: 0 });
+        });
+
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                id: 'homeToAbout',
+                trigger: document.body,
+                start: 'top top',
+                end: '+=200%',
+                scrub: true,
+                onUpdate: (self) => {
+                    // Pause pop animation while scrubbing; resume only at very top
+                    if (self.progress > 0.001) {
+                        window.__heroMorph?.stop?.();
+                    } else {
+                        window.__heroMorph?.start?.();
+                    }
+                }
+            }
+        });
+
+        // Text swap + About dissolve
+        tl.to(productionsText, { autoAlpha: 0, y: -30, duration: 0.6, ease: 'none' }, 0);
+        tl.to(tagline, { autoAlpha: 0, y: -20, duration: 0.6, ease: 'none' }, 0);
+
+        // About layer fades in slowly (dissolve)
+        tl.to(aboutSection, { opacity: 1, duration: 1.2, ease: 'none' }, 0.05);
+
+        // Background color dissolves from dark -> light (solid colors, partial opacity)
+        tl.to(aboutSection, { backgroundColor: 'rgba(255, 255, 255, 0.88)', duration: 1.2, ease: 'none' }, 0.12);
+
+        // Text colors dissolve in sync for readability
+        tl.to(aboutTitle, { color: '#0D0D0D', duration: 1.2, ease: 'none' }, 0.12);
+        tl.to(getImpactLines(), { color: '#0D0D0D', duration: 1.2, ease: 'none' }, 0.12);
+        tl.to(aboutText, { color: 'rgba(13, 13, 13, 0.72)', duration: 1.2, ease: 'none' }, 0.12);
+
+        // Shapes to targets
+        shapes.forEach((shape, index) => {
+            const d = deltas[index];
+            if (!d) return;
+
+            const digitShape = shape.querySelector('.digit-shape');
+            const digit = shape.querySelector('.shape-digit');
+            const icon = shape.querySelector('.shape-icon');
+
+            // Slight eased feel while still landing exactly on target
+            tl.to(shape, { x: d.dx, y: d.dy, duration: 1.2, ease: 'power1.inOut' }, 0);
+            tl.to(digitShape, { scale: d.targetScale, duration: 1.2, ease: 'power1.inOut' }, 0);
+            tl.to(digit, { autoAlpha: 0, duration: 0.35, ease: 'none' }, 0.15);
+            tl.to(icon, { autoAlpha: 1, scale: 1, duration: 0.45, ease: 'none' }, 0.25);
+        });
+
+        // Words slide in
+        tl.to(words, { x: 0, autoAlpha: 1, duration: 0.9, ease: 'none' }, 0.35);
+
+        return tl;
+    }
+
+    // Build once after layout settles
+    const ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+    ready.then(() => {
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                buildHomeToAboutTimeline();
+                ScrollTrigger.refresh();
+                ScrollTrigger.update();
+            });
+        });
+    });
+
+    // Rebuild on resize (targets move)
+    window.addEventListener('resize', () => {
+        buildHomeToAboutTimeline();
+        ScrollTrigger.refresh();
+        ScrollTrigger.update();
     });
 }
