@@ -600,13 +600,14 @@ function initAboutSection() {
         if (!Number.isFinite(lineHeight)) {
             lineHeight = fontSize * 1.55;
         }
-        const iconSize = Math.round(lineHeight * 1.4); // Increase icon size by 40%
+        const targetSize = Math.round(lineHeight); // Container size matches line height
+        const iconFontSize = Math.round(lineHeight * 1.6); // Icon font size is larger than container
 
         const prevAboutOpacity = gsap.getProperty(aboutSection, 'opacity');
         gsap.set(aboutSection, { opacity: 1 });
         
         // Set icon-target containers to final size BEFORE measuring so scale calculations are accurate
-        gsap.set(iconTargets, { width: iconSize, height: iconSize });
+        gsap.set(iconTargets, { width: targetSize, height: targetSize });
 
         const deltas = shapeEls.map(({ shape, digitShape }, index) => {
             const iconTarget = iconTargets[index];
@@ -631,9 +632,9 @@ function initAboutSection() {
             const iconSizePx = Math.min(iconRect.width || 0, iconRect.height || 0);
             const targetScale = iconSizePx && digitRect.width ? (iconSizePx / digitRect.width) : 0.133;
 
-            // Calculate scale for shape-container to match line height (lineHeight = iconSize due to matching above)
-            // shape-container wraps digit-shape (180px), so to match iconSize we need: 180 * containerScale ≈ iconSize
-            const containerScale = iconSize / 180;
+            // Calculate scale for shape-container to match target size
+            // shape-container wraps digit-shape (180px), so to match targetSize we need: 180 * containerScale ≈ targetSize
+            const containerScale = targetSize / 180;
 
             return { dx, dy, targetScale: Math.max(0.08, Math.min(0.35, targetScale)), containerScale };
         });
@@ -679,7 +680,7 @@ function initAboutSection() {
                                 gsap.set(digit, { autoAlpha: 0 });
                                 // IMPORTANT: .digit-shape uses a huge font-size (180px). Ensure icons
                                 // don't inherit that when About is shown.
-                                gsap.set(icon, { autoAlpha: 1, scale: 1, fontSize: iconSize });
+                                gsap.set(icon, { autoAlpha: 1, scale: 1, fontSize: iconFontSize });
                             });
                         } else {
                             gsap.set(aboutSection, { opacity: 0, backgroundColor: '#FFFFFF' });
@@ -709,8 +710,8 @@ function initAboutSection() {
             tl.to(digitShape, { scale: d.targetScale, duration: 1.2, ease: 'power1.inOut' }, 0);
             tl.to(digit, { autoAlpha: 0, duration: 0.35, ease: 'none' }, 0.15);
             tl.to(icon, { autoAlpha: 1, scale: 1, duration: 0.45, ease: 'none' }, 0.25);
-            // Ensure icon glyph size matches About text line-height instead of inheriting 180px from .digit-shape
-            tl.to(icon, { fontSize: iconSize, duration: 1.2, ease: 'power1.inOut' }, 0);
+            // Ensure icon glyph size is larger than container for better visibility
+            tl.to(icon, { fontSize: iconFontSize, duration: 1.2, ease: 'power1.inOut' }, 0);
         });
 
         // Words slide in
