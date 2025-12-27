@@ -1,23 +1,205 @@
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
 
+// Force scroll to top immediately (before any rendering)
+if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+}
+window.scrollTo(0, 0);
+document.documentElement.scrollTop = 0;
+document.body.scrollTop = 0;
+
+// Loading Screen Animation
+function initLoadingScreen(onReveal) {
+    const loadingScreen = document.querySelector('.loading-screen');
+    const loadingDigits = document.querySelectorAll('.loading-digit');
+    const digitGlows = document.querySelectorAll('.digit-glow');
+    const loadingProgress = document.querySelector('.loading-progress');
+    const loadingPercentage = document.querySelector('.loading-percentage');
+    const loadingText = document.querySelector('.loading-text');
+    const loadingBarContainer = document.querySelector('.loading-bar-container');
+    const loadingParticles = document.querySelector('.loading-particles');
+    
+    // Create floating particles
+    for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.style.position = 'absolute';
+        particle.style.width = Math.random() * 4 + 2 + 'px';
+        particle.style.height = particle.style.width;
+        particle.style.background = 'rgba(255, 107, 53, 0.6)';
+        particle.style.borderRadius = '50%';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.boxShadow = '0 0 10px rgba(255, 107, 53, 0.8)';
+        loadingParticles.appendChild(particle);
+        
+        // Animate particle
+        gsap.to(particle, {
+            y: -100 - Math.random() * 200,
+            x: (Math.random() - 0.5) * 100,
+            opacity: 0,
+            duration: 2 + Math.random() * 3,
+            repeat: -1,
+            delay: Math.random() * 2,
+            ease: 'power1.out'
+        });
+    }
+    
+    // Main timeline
+    const tl = gsap.timeline();
+    
+    // Animate digits with 3D rotation effect
+    tl.to(loadingDigits, {
+        opacity: 1,
+        y: 0,
+        rotateX: 0,
+        duration: 1,
+        stagger: 0.1,
+        ease: 'power3.out'
+    })
+    .to(digitGlows, {
+        opacity: 1,
+        scale: 1.2,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: 'power2.out'
+    }, '<0.2')
+    .to(loadingText, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: 'power2.out'
+    }, '-=0.4')
+    .to(loadingBarContainer, {
+        opacity: 1,
+        duration: 0.6,
+        ease: 'power2.out'
+    }, '-=0.3');
+    
+    // Pulse animation for glows
+    gsap.to(digitGlows, {
+        scale: 1.3,
+        opacity: 0.8,
+        duration: 1.5,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+        stagger: 0.2
+    });
+    
+    // Rotate digits slightly
+    gsap.to(loadingDigits, {
+        rotateY: 360,
+        duration: 3,
+        repeat: -1,
+        ease: 'none',
+        stagger: 0.2
+    });
+    
+    // Animate progress bar with percentage counter
+    const progressTween = gsap.to(loadingProgress, {
+        width: '100%',
+        duration: 2.5,
+        ease: 'power2.inOut',
+        onUpdate: function() {
+            const progress = Math.round(this.progress() * 100);
+            loadingPercentage.textContent = progress + '%';
+        }
+    });
+    
+    // Track when loading started
+    const loadingStartTime = Date.now();
+    const minimumLoadingTime = 2000; // Minimum 2 seconds display time
+    
+    // Remove loading screen after everything is ready
+    return new Promise((resolve) => {
+        window.addEventListener('load', () => {
+            // Calculate how long the loading screen has been displayed
+            const elapsedTime = Date.now() - loadingStartTime;
+            const remainingTime = Math.max(0, minimumLoadingTime - elapsedTime);
+            
+            setTimeout(() => {
+                // Final animation sequence
+                const exitTl = gsap.timeline({
+                    onComplete: () => {
+                        loadingScreen.style.display = 'none';
+                        resolve();
+                    }
+                });
+                
+                exitTl
+                    .to(loadingProgress, {
+                        width: '100%',
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    })
+                    .to(loadingPercentage, {
+                        innerText: 100,
+                        duration: 0.3,
+                        snap: { innerText: 1 },
+                        ease: 'power2.out',
+                        onUpdate: function() {
+                            loadingPercentage.textContent = Math.round(this.targets()[0].innerText) + '%';
+                        }
+                    }, '<')
+                    .to([loadingBarContainer, loadingText], {
+                        opacity: 0,
+                        y: 20,
+                        duration: 0.4,
+                        ease: 'power2.in'
+                    }, '+=0.2')
+                    .to(loadingDigits, {
+                        scale: 1.5,
+                        opacity: 0,
+                        rotateX: 90,
+                        duration: 0.6,
+                        stagger: 0.05,
+                        ease: 'back.in(2)'
+                    }, '-=0.2')
+                    .call(() => {
+                        // Initialize site animations (sets opacity: 0)
+                        if (onReveal) onReveal();
+                        // Reveal container (content is hidden by GSAP now)
+                        document.body.classList.add('loaded');
+                    })
+                    .to(loadingScreen, {
+                        opacity: 0,
+                        duration: 0.5,
+                        ease: 'power2.inOut'
+                    }, '-=0.3');
+            }, remainingTime);
+        });
+    });
+}
+
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', () => {
-    // Always start at top on reload (disable browser scroll restoration)
-    if ('scrollRestoration' in history) {
-        history.scrollRestoration = 'manual';
-    }
+    // Ensure we're at the top
     window.scrollTo(0, 0);
 
-    initHeader();
-    initHeroSection();
-    initAboutSection();
+    // Initialize loading screen first
+    initLoadingScreen(() => {
+        // Initialize site animations right before loading screen fades out
+        initHeader();
+        initHeroSection();
+        initAboutSection();
+    });
 });
 
 // Some browsers restore scroll position after DOMContentLoaded (bfcache/pageshow).
 // This ensures we still reset to the top.
-window.addEventListener('pageshow', () => {
-    window.scrollTo(0, 0);
+window.addEventListener('pageshow', (event) => {
+    // Force scroll to top on page show
+    setTimeout(() => {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+    }, 0);
+    
+    // If page was cached (back/forward), reload to reset state
+    if (event.persisted) {
+        window.location.reload();
+    }
 });
 
 // Header Animations
@@ -167,6 +349,10 @@ function animateLogo() {
 
 // Hero Section Animations
 function initHeroSection() {
+    // Set initial hidden state for text elements to prevent flash
+    gsap.set('.productions-text', { y: 50, opacity: 0 });
+    gsap.set('.tagline', { y: 30, opacity: 0 });
+    
     // Shape and color configurations
     const shapeConfigs = [
         { shape: 'square', colors: ['#2ECC71', '#27AE60'] },
@@ -199,21 +385,29 @@ function initHeroSection() {
     });
 
     // Animate PRODUCTIONS text
-    gsap.from('.productions-text', {
-        y: 50,
-        opacity: 0,
+    gsap.to('.productions-text', {
+        y: 0,
+        opacity: 1,
         duration: 1,
         ease: 'power3.out',
-        delay: 1.2
+        delay: 2.0
     });
 
     // Animate tagline
-    gsap.from('.tagline', {
-        y: 30,
-        opacity: 0,
+    gsap.to('.tagline', {
+        y: 0,
+        opacity: 1,
         duration: 0.8,
         ease: 'power2.out',
-        delay: 1.5
+        delay: 2.3,
+        onComplete: () => {
+            document.body.classList.add('intro-done');
+            // Rebuild the scroll timeline to ensure it picks up the correct starting positions
+            // and clears any conflicting transforms from the entrance animation
+            if (window.rebuildHomeToAbout) {
+                window.rebuildHomeToAbout();
+            }
+        }
     });
 
     // Function to morph shapes
@@ -577,7 +771,12 @@ function initAboutSection() {
         gsap.set(aboutTitle, { color: '#0D0D0D' });
         gsap.set(getImpactLines(), { color: '#0D0D0D' });
         gsap.set(aboutText, { color: '#0D0D0D' });
-        gsap.set([productionsText, tagline], { clearProps: 'transform', autoAlpha: 1 });
+        
+        // Only reset text visibility if we're not in the initial load phase
+        // or if we are rebuilding due to resize after intro
+        if (document.body.classList.contains('intro-done')) {
+            gsap.set([productionsText, tagline], { clearProps: 'transform', autoAlpha: 1 });
+        }
 
         shapeEls.forEach(({ digitShape, digit, icon }) => {
             gsap.set(digitShape, { scale: 1 });
@@ -725,6 +924,9 @@ function initAboutSection() {
         ScrollTrigger.refresh();
         ScrollTrigger.update();
     }
+    
+    // Expose for external calls (e.g. from initHeroSection onComplete)
+    window.rebuildHomeToAbout = rebuildHomeToAbout;
 
     // Build once after layout settles
     const ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
