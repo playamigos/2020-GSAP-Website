@@ -183,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initHeader();
         initHeroSection();
         initAboutSection();
+        initProjectSection();
     });
 });
 
@@ -852,7 +853,7 @@ function initAboutSection() {
                 id: 'homeToAbout',
                 trigger: document.body,
                 start: 'top top',
-                end: '+=200%',
+                end: () => "+=" + (window.innerHeight * 2),
                 scrub: true,
                 onUpdate: (self) => {
                     // Pause pop animation while scrubbing; resume only at very top.
@@ -938,4 +939,257 @@ function initAboutSection() {
 
     // Rebuild on resize (targets move)
     window.addEventListener('resize', rebuildHomeToAbout);
+}
+
+// Project Section Transition
+function initProjectSection() {
+    const canvas = document.getElementById('transition-canvas');
+    const ctx = canvas.getContext('2d');
+    const projectsSection = document.querySelector('.projects-section');
+    const aboutSection = document.querySelector('.about-section');
+    const shapesLayer = document.querySelector('.shapes-layer');
+    
+    // Set canvas size
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    
+    // Arrow colors (solid)
+    const colors = ['#C1FF00', '#80D0FF', '#FF6B35'];
+    const secondaryColors = ['#FF5E00', '#7B61FF', '#FFC300'];
+    
+    // Draw arrow function with smooth rounded corners
+    function drawArrow(ctx, x, y, width, height, color, arrowTipWidth) {
+        const radius = 15; // Corner radius
+        const tipRadius = 20; // Radius for the arrow tip
+        
+        ctx.fillStyle = color;
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1.5;
+        
+        ctx.beginPath();
+        
+        // Start from top-left, after the rounded corner
+        ctx.moveTo(x + radius, y);
+        
+        // Top edge - go to before the arrow tip area
+        ctx.lineTo(x + width - arrowTipWidth, y);
+        
+        // Arrow tip - rounded
+        // Use arcTo to create a rounded tip at the vertex
+        // Control point 1: The theoretical sharp tip
+        // Control point 2: The bottom corner of the arrow head base
+        ctx.arcTo(x + width, y + height / 2, x + width - arrowTipWidth, y + height, tipRadius);
+        
+        // Bottom edge start
+        ctx.lineTo(x + width - arrowTipWidth, y + height);
+        
+        // Bottom edge
+        ctx.lineTo(x + radius, y + height);
+        
+        // Bottom-left rounded corner
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        
+        // Left edge
+        ctx.lineTo(x, y + radius);
+        
+        // Top-left rounded corner
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    // Draw curved arrow function
+    function drawCurvedArrow(ctx, cx, cy, radius, thickness, arcLength, color, rotation) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(rotation);
+        
+        ctx.fillStyle = color;
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1.5;
+        
+        // Calculate angles
+        // We center the arrow at -PI/2 (top of circle)
+        const totalAngle = arcLength / radius;
+        const startAngle = -Math.PI / 2 - totalAngle / 2;
+        const endAngle = -Math.PI / 2 + totalAngle / 2;
+        const tipAngle = 80 / radius; // Approx tip length in radians
+        
+        const rInner = radius - thickness / 2;
+        const rOuter = radius + thickness / 2;
+        const cornerRadius = 15;
+        
+        // Angular offsets for rounded corners at the tail
+        const startAngleInner = startAngle + (cornerRadius / rInner);
+        const startAngleOuter = startAngle + (cornerRadius / rOuter);
+        
+        ctx.beginPath();
+        
+        // Inner edge (moving forward)
+        ctx.arc(0, 0, rInner, startAngleInner, endAngle - tipAngle);
+        
+        // Tip
+        // Calculate tip points
+        const tipX = Math.cos(endAngle) * radius;
+        const tipY = Math.sin(endAngle) * radius;
+        const outerTipBaseX = Math.cos(endAngle - tipAngle) * rOuter;
+        const outerTipBaseY = Math.sin(endAngle - tipAngle) * rOuter;
+        
+        // Draw rounded tip
+        ctx.arcTo(tipX + 20, tipY + 20, outerTipBaseX, outerTipBaseY, 20);
+        
+        // Outer edge (moving backward)
+        ctx.lineTo(outerTipBaseX, outerTipBaseY);
+        ctx.arc(0, 0, rOuter, endAngle - tipAngle, startAngleOuter, true);
+        
+        // Tail rounded corners
+        // Point on the back edge (outer side)
+        const backOuterX = Math.cos(startAngle) * (rOuter - cornerRadius);
+        const backOuterY = Math.sin(startAngle) * (rOuter - cornerRadius);
+        
+        // Point on the back edge (inner side)
+        const backInnerX = Math.cos(startAngle) * (rInner + cornerRadius);
+        const backInnerY = Math.sin(startAngle) * (rInner + cornerRadius);
+        
+        // Outer tail corner
+        const cpOuterX = Math.cos(startAngle) * rOuter;
+        const cpOuterY = Math.sin(startAngle) * rOuter;
+        
+        ctx.quadraticCurveTo(cpOuterX, cpOuterY, backOuterX, backOuterY);
+        
+        // Back edge line
+        ctx.lineTo(backInnerX, backInnerY);
+        
+        // Inner tail corner
+        const cpInnerX = Math.cos(startAngle) * rInner;
+        const cpInnerY = Math.sin(startAngle) * rInner;
+        
+        // The start of the inner arc
+        const startInnerX = Math.cos(startAngleInner) * rInner;
+        const startInnerY = Math.sin(startAngleInner) * rInner;
+        
+        ctx.quadraticCurveTo(cpInnerX, cpInnerY, startInnerX, startInnerY);
+        
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.restore();
+    }
+    
+    // Animation state
+    const arrowState = { progress: 0 };
+    
+    function renderArrows() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const rowHeight = canvas.height / 3;
+        const arrowWidth = canvas.width * 3;
+        const arrowTipWidth = 80;
+        const overlap = arrowWidth * 0.4; // Overlap amount
+        
+        colors.forEach((color, i) => {
+            const stagger = i * 0.05;
+            const adjustedProgress = Math.max(0, Math.min(1, arrowState.progress - stagger));
+            
+            // Calculate x position: start offscreen left, move to cover, then exit right
+            let x;
+            if (adjustedProgress < 0.5) {
+                // Slide in from left
+                x = -arrowWidth + (adjustedProgress * 2) * (arrowWidth + canvas.width * 0.1);
+            } else {
+                // Slide out to right
+                x = canvas.width * 0.1 + ((adjustedProgress - 0.5) * 2) * (arrowWidth + canvas.width);
+            }
+            
+            // Trailing arrow position
+            const x2 = x - arrowWidth + overlap;
+            
+            // Draw leading arrow first (behind)
+            drawArrow(ctx, x, i * rowHeight, arrowWidth, rowHeight, color, arrowTipWidth);
+            
+            // Draw trailing arrow second (on top)
+            drawArrow(ctx, x2, i * rowHeight, arrowWidth, rowHeight, secondaryColors[i], arrowTipWidth);
+        });
+
+        // Draw the new curved arrow during the exit phase
+        if (arrowState.progress > 0.05) {
+            const curvedProgress = Math.max(0, (arrowState.progress - 0.05) / 0.7);
+            // Rotation: 0 to 90 degrees (0 to PI/2)
+            const rotation = curvedProgress * (Math.PI / 2)-19.7;
+            
+            // Pivot point away from screen (below)
+            const cx = canvas.width / 2 - canvas.width * 0.45; // Shift left slightly so it sweeps nicely
+            const cy = canvas.height * 2.665; // Far below
+            const radius = canvas.height * 2.5 - rowHeight; // Radius to put it on screen
+            
+            // Only draw if it's entering/on screen
+            drawCurvedArrow(
+                ctx, 
+                cx, 
+                cy, 
+                radius, 
+                rowHeight, 
+                arrowWidth*0.5, 
+                '#FF0055', // Distinct pink/red color
+                rotation
+            );
+            // Only draw if it's entering/on screen
+            drawCurvedArrow(
+                ctx, 
+                cx, 
+                cy, 
+                radius, 
+                rowHeight, 
+                arrowWidth*0.3, 
+                '#84ff00ff', // Distinct pink/red color
+                rotation-0.3
+            );
+        }
+    }
+    
+    // Create the transition timeline
+    const tl = gsap.timeline({
+        scrollTrigger: {
+            id: 'aboutToProjects',
+            trigger: document.body,
+            start: () => (window.innerHeight * 2.5) + "px top",
+            end: () => "+=" + (window.innerHeight * 1.5),
+            scrub: true,
+            onUpdate: (self) => {
+                arrowState.progress = self.progress;
+                renderArrows();
+                
+                // Switch sections at midpoint
+                if (self.progress >= 0.5 && projectsSection.style.opacity !== '1') {
+                    projectsSection.style.opacity = '1';
+                    projectsSection.style.visibility = 'visible';
+                    projectsSection.style.pointerEvents = 'auto';
+                    aboutSection.style.opacity = '0';
+                    shapesLayer.style.opacity = '0';
+                } else if (self.progress < 0.5 && aboutSection.style.opacity !== '1') {
+                    projectsSection.style.opacity = '0';
+                    projectsSection.style.visibility = 'hidden';
+                    projectsSection.style.pointerEvents = 'none';
+                    aboutSection.style.opacity = '1';
+                    shapesLayer.style.opacity = '1';
+                }
+            },
+            onLeave: () => {
+                projectsSection.style.pointerEvents = 'auto';
+            },
+            onEnterBack: () => {
+                projectsSection.style.pointerEvents = 'none';
+            }
+        }
+    });
+    
+    // Initial render
+    renderArrows();
 }
