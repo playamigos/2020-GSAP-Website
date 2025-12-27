@@ -184,6 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initHeroSection();
         initAboutSection();
         initProjectSection();
+        initServicesSection();
     });
 });
 
@@ -275,7 +276,7 @@ function initHeader() {
             const progressMap = {
                 '#home': 0,
                 '#about': 0.65,
-                '#projects': 0.85,
+                '#services': 0.85,
                 '#contact': 1
             };
 
@@ -941,11 +942,11 @@ function initAboutSection() {
     window.addEventListener('resize', rebuildHomeToAbout);
 }
 
-// Project Section Transition
+// Project Section Transition (Now transitions to Services)
 function initProjectSection() {
     const canvas = document.getElementById('transition-canvas');
     const ctx = canvas.getContext('2d');
-    const projectsSection = document.querySelector('.projects-section');
+    const servicesSection = document.querySelector('.services-section');
     const aboutSection = document.querySelector('.about-section');
     const shapesLayer = document.querySelector('.shapes-layer');
     
@@ -1157,7 +1158,7 @@ function initProjectSection() {
     // Create the transition timeline
     const tl = gsap.timeline({
         scrollTrigger: {
-            id: 'aboutToProjects',
+            id: 'aboutToServices',
             trigger: document.body,
             start: () => (window.innerHeight * 2.5) + "px top",
             end: () => "+=" + (window.innerHeight * 1.5),
@@ -1167,29 +1168,93 @@ function initProjectSection() {
                 renderArrows();
                 
                 // Switch sections at midpoint
-                if (self.progress >= 0.5 && projectsSection.style.opacity !== '1') {
-                    projectsSection.style.opacity = '1';
-                    projectsSection.style.visibility = 'visible';
-                    projectsSection.style.pointerEvents = 'auto';
+                if (self.progress >= 0.5 && servicesSection.style.opacity !== '1') {
+                    servicesSection.style.opacity = '1';
+                    servicesSection.style.visibility = 'visible';
+                    servicesSection.style.pointerEvents = 'auto';
                     aboutSection.style.opacity = '0';
                     shapesLayer.style.opacity = '0';
                 } else if (self.progress < 0.5 && aboutSection.style.opacity !== '1') {
-                    projectsSection.style.opacity = '0';
-                    projectsSection.style.visibility = 'hidden';
-                    projectsSection.style.pointerEvents = 'none';
+                    servicesSection.style.opacity = '0';
+                    servicesSection.style.visibility = 'hidden';
+                    servicesSection.style.pointerEvents = 'none';
                     aboutSection.style.opacity = '1';
                     shapesLayer.style.opacity = '1';
                 }
             },
             onLeave: () => {
-                projectsSection.style.pointerEvents = 'auto';
+                servicesSection.style.pointerEvents = 'auto';
             },
             onEnterBack: () => {
-                projectsSection.style.pointerEvents = 'none';
+                servicesSection.style.pointerEvents = 'none';
             }
         }
     });
     
     // Initial render
     renderArrows();
+}
+
+// Services Section with Horizontal Scroll
+function initServicesSection() {
+    const servicesSection = document.querySelector('.services-section');
+    const track = document.querySelector('.services-track');
+    const tiles = Array.from(document.querySelectorAll('.service-tile'));
+    
+    if (!servicesSection || !track || tiles.length === 0) return;
+    
+    // Clone tiles for infinite loop effect
+    const clone = track.cloneNode(true);
+    track.parentNode.appendChild(clone);
+    
+    // Calculate total width
+    const tileWidth = 320 + 30; // tile width + gap
+    const totalWidth = tiles.length * tileWidth;
+    
+    // Create scroll animation
+    const scrollTl = gsap.timeline({
+        scrollTrigger: {
+            id: 'servicesScroll',
+            trigger: document.body,
+            // Start right after the arrow transition (which ends at 4.0vh)
+            start: () => (window.innerHeight * 4.0) + "px top",
+            end: () => "+=" + (window.innerHeight * 3),
+            scrub: true,
+            onUpdate: (self) => {
+                const progress = self.progress;
+                
+                // Horizontal scroll effect (infinite loop)
+                const scrollAmount = progress * totalWidth * 2;
+                const xPos = -(scrollAmount % totalWidth);
+                
+                gsap.set([track, clone], {
+                    x: xPos
+                });
+            }
+        }
+    });
+    
+    // Add stagger animation for tiles on entrance
+    tiles.forEach((tile, i) => {
+        gsap.fromTo(tile, 
+            { 
+                opacity: 0, 
+                y: 50,
+                scale: 0.8
+            },
+            {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                duration: 0.6,
+                ease: 'back.out(1.7)',
+                scrollTrigger: {
+                    trigger: document.body,
+                    start: () => (window.innerHeight * 4.0) + "px top",
+                    end: () => (window.innerHeight * 4.3) + "px top",
+                    scrub: true
+                }
+            }
+        );
+    });
 }
