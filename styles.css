@@ -20,6 +20,7 @@ body {
     overflow-x: hidden;
     line-height: 1.6;
     font-optical-sizing: auto;
+    height: 800vh; /* Ensure enough scroll space for all animations */
 }
 
 /* Hide main content initially until loading screen completes */
