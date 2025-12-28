@@ -388,7 +388,7 @@ function initHeroSection() {
         duration: 1,
         stagger: 0.15,
         ease: 'back.out(1.7)',
-        delay: 0.5
+        delay: 0.4
     });
 
     // Animate PRODUCTIONS text
@@ -397,7 +397,7 @@ function initHeroSection() {
         opacity: 1,
         duration: 1,
         ease: 'power3.out',
-        delay: 2.0
+        delay: 0.7
     });
 
     // Animate tagline
@@ -406,7 +406,7 @@ function initHeroSection() {
         opacity: 1,
         duration: 0.8,
         ease: 'power2.out',
-        delay: 2.3,
+        delay: 1,
         onComplete: () => {
             document.body.classList.add('intro-done');
             // Rebuild the scroll timeline to ensure it picks up the correct starting positions
@@ -921,7 +921,7 @@ function initAboutSection() {
         });
 
         // Words slide in
-        tl.to(words, { x: 0, autoAlpha: 1, duration: 0.9, ease: 'none' }, 0.35);
+        tl.to(words, { x: 0, autoAlpha: 1, duration: 0.3, ease: 'none' }, 0.85);
 
         return tl;
     }
