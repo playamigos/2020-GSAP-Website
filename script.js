@@ -1123,7 +1123,7 @@ function initProjectSection() {
         if (arrowState.progress > 0.05) {
             const curvedProgress = Math.max(0, (arrowState.progress - 0.05) / 0.7);
             // Rotation: 0 to 90 degrees (0 to PI/2)
-            const rotation = curvedProgress * (Math.PI / 2)-19.7;
+            const rotation = 1.6*curvedProgress * (Math.PI / 2)-19.8;
             
             // Pivot point away from screen (below)
             const cx = canvas.width / 2 - canvas.width * 0.45; // Shift left slightly so it sweeps nicely
@@ -1137,7 +1137,7 @@ function initProjectSection() {
                 cy, 
                 radius, 
                 rowHeight, 
-                arrowWidth*0.5, 
+                arrowWidth*0.6, 
                 '#FF0055', // Distinct pink/red color
                 rotation
             );
@@ -1148,7 +1148,7 @@ function initProjectSection() {
                 cy, 
                 radius, 
                 rowHeight, 
-                arrowWidth*0.3, 
+                arrowWidth*0.5, 
                 '#84ff00ff', // Distinct pink/red color
                 rotation-0.3
             );
@@ -1161,7 +1161,7 @@ function initProjectSection() {
             id: 'aboutToServices',
             trigger: document.body,
             start: () => (window.innerHeight * 2.5) + "px top",
-            end: () => "+=" + (window.innerHeight * 1.5),
+            end: () => "+=" + (window.innerHeight * 2),
             scrub: true,
             onUpdate: (self) => {
                 arrowState.progress = self.progress;
@@ -1216,8 +1216,8 @@ function initServicesSection() {
         scrollTrigger: {
             id: 'servicesScroll',
             trigger: document.body,
-            // Start right after the arrow transition (which ends at 4.0vh)
-            start: () => (window.innerHeight * 4.0) + "px top",
+            // Start right after the arrow transition (which ends at 4.5vh)
+            start: () => (window.innerHeight * 4.5) + "px top",
             end: () => "+=" + (window.innerHeight * 3),
             scrub: true,
             onUpdate: (self) => {
@@ -1250,8 +1250,8 @@ function initServicesSection() {
                 ease: 'back.out(1.7)',
                 scrollTrigger: {
                     trigger: document.body,
-                    start: () => (window.innerHeight * 4.0) + "px top",
-                    end: () => (window.innerHeight * 4.3) + "px top",
+                    start: () => (window.innerHeight * 4.5) + "px top",
+                    end: () => (window.innerHeight * 4.8) + "px top",
                     scrub: true
                 }
             }
