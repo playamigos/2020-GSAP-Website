@@ -1040,7 +1040,7 @@ main {
     transition: transform 0.3s ease, border 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
     margin-bottom: 1.5rem;
     break-inside: avoid;
-    border: 2px solid rgba(255, 255, 255, 1);
+    border: 2px solid rgba(30, 30, 30, 1);
 }
 
 /* Animated background for live effect */
