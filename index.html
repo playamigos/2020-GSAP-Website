@@ -70,7 +70,7 @@
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="#about" class="menu-link">About</a>
+                        <a href="#portfolio" class="menu-link">Portfolio</a>
                     </li>
                     <li class="menu-item">
                         <a href="#services" class="menu-link">Services</a>
@@ -81,6 +81,11 @@
                                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                             </svg>
                         </a>
+                    </li>
+                    <li class="menu-item">
+                        <button id="music-toggle" class="music-toggle" title="Toggle Music" aria-label="Toggle Background Music">
+                            <i class="fas fa-music"></i>
+                        </button>
                     </li>
                 </ul>
             </nav>
@@ -250,7 +255,7 @@
                         </div>
                         
                         <!-- Special Last Tile -->
-                        <div class="service-tile special-tile" data-category="projects" style="--tile-color: #000000;">
+                        <div class="service-tile special-tile" data-category="projects" style="--tile-color: #0d0d0d;">
                             <div class="tile-icon"><i class="fas fa-arrow-up"></i></div>
                             <h3 class="tile-title">Our Work</h3>
                             <p class="tile-desc">Explore our<br>Portfolio</p>
@@ -329,6 +334,11 @@
 
     <!-- Cursor Trail Particles -->
     <div class="cursor-particles"></div>
+
+    <!-- Background Music -->
+    <audio id="background-music" loop>
+        <source src="2020.mp3" type="audio/mpeg">
+    </audio>
 
     <!-- GSAP Library -->
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>

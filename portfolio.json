@@ -8,14 +8,14 @@
           "id": "bandi-sanjay-yatra",
           "title": "Bandi Sanjay Praja Sangrama Yatra",
           "description": "Full-scale digital and ground campaign management",
-          "image": "Images/bandi-sanjay-yatra.jpg",
+          "image": "Images/sanjay.png",
           "category": "political"
         },
         {
           "id": "tdp-campaigns",
           "title": "TDP Election Campaigns",
           "description": "Strategy, digital outreach, and high-impact political ad films",
-          "image": "Images/tdp-campaigns.jpg",
+          "image": "Images/cbn.png",
           "category": "political"
         },
         {
@@ -42,21 +42,21 @@
           "id": "etv-win",
           "title": "ETV Win",
           "description": "Comprehensive brand and movie promotion strategies",
-          "image": "Images/etv-win.jpg",
+          "image": "Images/etv.png",
           "category": "entertainment"
         },
         {
           "id": "movie-promotions",
           "title": "Movie Promotions",
           "description": "Digital marketing and content buzz for upcoming theatrical releases",
-          "image": "Images/movie-promotions.jpg",
+          "image": "Images/mahesh.jpg",
           "category": "entertainment"
         },
         {
           "id": "shekar-master",
           "title": "Shekar Master Social Media",
           "description": "Managing and scaling digital presence for celebrity talent",
-          "image": "Images/shekar-master.jpg",
+          "image": "Images/shekar.png",
           "category": "entertainment"
         },
         {
@@ -76,28 +76,28 @@
           "id": "3d-animation",
           "title": "3D Animation Channels",
           "description": "High-fidelity 3D storytelling for global YouTube audiences",
-          "image": "Images/3d-animation.jpg",
+          "image": "Images/roadheros.png",
           "category": "animation"
         },
         {
           "id": "2d-animation",
           "title": "2D Animation Series",
           "description": "Creative, character-driven 2D content for specialized niche channels",
-          "image": "Images/2d-animation.jpg",
+          "image": "Images/spacetalks.png",
           "category": "animation"
         },
         {
           "id": "ai-content",
           "title": "AI-Generated Content",
           "description": "Utilizing generative AI to produce rapid, futuristic video solutions",
-          "image": "Images/ai-content.jpg",
+          "image": "Images/snake.png",
           "category": "animation"
         },
         {
           "id": "explainer-films",
           "title": "Explainer & Concept Films",
           "description": "Simplifying complex ideas through motion graphics",
-          "image": "Images/explainer-films.jpg",
+          "image": "Images/samhara.png",
           "category": "animation"
         }
       ]
@@ -110,7 +110,7 @@
           "id": "real-estate",
           "title": "Real Estate Ad Films",
           "description": "Specialized cinematic tours and marketing for property developers",
-          "image": "Images/real-estate.jpg",
+          "image": "Images/realestate.png",
           "category": "commercial"
         },
         {

@@ -176,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initContactSection();
         initHomeParticles();
         initCursorTrail();
+        initMusicToggle();
     });
 });
 
@@ -253,28 +254,41 @@ function initHeader() {
         lastScroll = currentScroll;
     });
 
-    // Smooth scroll for navigation links (no ScrollToPlugin required)
-    // This site uses a scroll-driven transition rather than real section offsets,
-    // so we map anchors to ScrollTrigger progress positions.
+    // Smooth scroll for navigation links
+    // Map navigation anchors to actual scroll positions based on section layout
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
+            e.preventDefault();
             const href = this.getAttribute('href');
             if (!href) return;
 
-            const st = ScrollTrigger.getById('homeToAbout');
-            if (!st) return;
-
-            const progressMap = {
+            // Calculate actual scroll positions based on site structure
+            // Home: 0vh
+            // About: ~4.5vh (after shapes animation)
+            // Services: ~8.5vh (start of horizontal scroll)
+            // Portfolio: ~9.5vh (after services)
+            // Contact: ~9.5vh + portfolio height + divider
+            
+            const scrollMap = {
                 '#home': 0,
-                '#about': 0.65,
-                '#services': 0.85,
-                '#contact': 1
+                '#portfolio': window.innerHeight * 9.5, // Start of projects section
+                '#services': window.innerHeight * 8.5,  // Start of services horizontal scroll
+                '#contact': () => {
+                    // Contact is after portfolio and divider
+                    const projectsSection = document.querySelector('.projects-section');
+                    const dividerSection = document.querySelector('.divider-section');
+                    if (projectsSection && dividerSection) {
+                        return window.innerHeight * 9.5 + projectsSection.offsetHeight + dividerSection.offsetHeight;
+                    }
+                    return window.innerHeight * 11; // Fallback
+                }
             };
 
-            if (!(href in progressMap)) return;
-            e.preventDefault();
+            let targetY = 0;
+            if (href in scrollMap) {
+                targetY = typeof scrollMap[href] === 'function' ? scrollMap[href]() : scrollMap[href];
+            }
 
-            const targetY = st.start + (st.end - st.start) * progressMap[href];
             window.scrollTo({ top: targetY, behavior: 'smooth' });
         });
     });
@@ -1673,4 +1687,42 @@ async function loadPortfolio() {
             container.innerHTML = '<p style="color: white; text-align: center; width: 100%;">Unable to load portfolio items.</p>';
         }
     }
+}
+
+function initMusicToggle() {
+    const musicToggle = document.getElementById('music-toggle');
+    const backgroundMusic = document.getElementById('background-music');
+    
+    if (!musicToggle || !backgroundMusic) return;
+    
+    // Set volume to 1/3rd (0.33)
+    backgroundMusic.volume = 0.2;
+    
+    let isPlaying = false;
+    
+    musicToggle.addEventListener('click', () => {
+        if (isPlaying) {
+            backgroundMusic.pause();
+            musicToggle.classList.remove('active');
+            musicToggle.querySelector('i').className = 'fas fa-music';
+            isPlaying = false;
+        } else {
+            // Try to play - browsers require user interaction
+            backgroundMusic.play().then(() => {
+                musicToggle.classList.add('active');
+                musicToggle.querySelector('i').className = 'fas fa-volume-up';
+                isPlaying = true;
+            }).catch((error) => {
+                console.log('Auto-play prevented:', error);
+                // User needs to interact first
+            });
+        }
+    });
+    
+    // Handle music ended (though it's looped, good to have)
+    backgroundMusic.addEventListener('ended', () => {
+        musicToggle.classList.remove('active');
+        musicToggle.querySelector('i').className = 'fas fa-music';
+        isPlaying = false;
+    });
 }

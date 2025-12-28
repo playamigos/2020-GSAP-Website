@@ -222,7 +222,7 @@ body:not(.loaded) main {
     height: var(--header-height);
     background-color: rgba(13, 13, 13, 0.92);
     backdrop-filter: blur(10px);
-    z-index: 1000;
+    z-index: 2000;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 50px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -333,6 +333,84 @@ body:not(.loaded) main {
 .menu-link:hover svg {
     transform: translateY(-2px);
     stroke: var(--accent-color);
+}
+
+/* Music Toggle Button */
+.music-toggle {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.music-toggle::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, var(--color-blue), var(--color-green));
+    border-radius: 50%;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 0;
+}
+
+.music-toggle:hover::before {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.music-toggle i {
+    font-size: 14px;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.music-toggle:hover {
+    transform: scale(1.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.music-toggle:hover i {
+    color: #FFFFFF;
+}
+
+.music-toggle.active {
+    background: linear-gradient(135deg, var(--color-blue) 0%, var(--color-green) 100%);
+    border-color: var(--color-blue);
+    box-shadow: 0 0 20px rgba(123, 97, 255, 0.5);
+    animation: musicPulse 2s ease-in-out infinite;
+}
+
+.music-toggle.active::before {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.music-toggle.active i {
+    color: #FFFFFF;
+    animation: musicNote 1.5s ease-in-out infinite;
+}
+
+@keyframes musicPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(123, 97, 255, 0.5); }
+    50% { box-shadow: 0 0 30px rgba(123, 97, 255, 0.8), 0 0 40px rgba(204, 255, 0, 0.4); }
+}
+
+@keyframes musicNote {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-2px) rotate(-5deg); }
+    75% { transform: translateY(2px) rotate(5deg); }
 }
 
 /* Main Content */
@@ -886,7 +964,7 @@ main {
     min-height: 100vh;
     height: auto;
     --bg-opacity: 0;
-    background-color: rgba(0, 0, 0, var(--bg-opacity));
+    background-color: rgba(13, 13, 13, var(--bg-opacity));
     z-index: 1001;
     opacity: 0;
     visibility: hidden;
@@ -1004,7 +1082,7 @@ main {
 
 /* Special Tile Styling */
 .service-tile.special-tile {
-    background: #000;
+    background: #0d0d0d;
     border-color: #FFD700; /* Golden border always */
     box-shadow: 0 0 40px rgba(255, 215, 0, 0.6); /* Strong golden glow always */
 }
