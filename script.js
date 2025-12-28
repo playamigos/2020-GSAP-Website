@@ -949,6 +949,14 @@ function initAboutSection() {
 
 // Project Section Transition (Now transitions to Services)
 function initProjectSection() {
+    // Apply background images to service tiles with data-bg-image
+    document.querySelectorAll('.service-tile[data-bg-image]').forEach(tile => {
+        const bgImage = tile.getAttribute('data-bg-image');
+        if (bgImage) {
+            tile.style.setProperty('--bg-image-url', `url('${bgImage}')`);
+        }
+    });
+    
     // Load portfolio data dynamically
     loadPortfolio().then(() => {
         // Initialize tooltip after portfolio items are loaded
@@ -1657,17 +1665,21 @@ async function loadPortfolio() {
         // Flatten all projects from all categories
         const allProjects = data.categories.flatMap(cat => cat.projects);
         
+        // Shuffle array randomly on each page load
+        for (let i = allProjects.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [allProjects[i], allProjects[j]] = [allProjects[j], allProjects[i]];
+        }
+        
         // Generate project items
         allProjects.forEach((project, index) => {
-            const height = Math.floor(Math.random() * 200) + 250; // Random height 250-450px
             const bgColor = colors[colorIndex % colors.length];
             colorIndex++;
             
             const projectItem = document.createElement('div');
             projectItem.className = 'project-item';
-            projectItem.style.height = height + 'px';
             projectItem.style.backgroundImage = `url('${project.image}')`;
-            projectItem.style.backgroundSize = 'cover';
+            projectItem.style.backgroundSize = 'contain';
             projectItem.style.backgroundPosition = 'center';
             projectItem.style.backgroundColor = bgColor;
             

@@ -6,30 +6,30 @@
       "projects": [
         {
           "id": "bandi-sanjay-yatra",
-          "title": "Bandi Sanjay Praja Sangrama Yatra",
+          "title": "Bandi Sanjay Praja Sangrama Yatra - Campaign management",
           "description": "Full-scale digital and ground campaign management",
-          "image": "Images/sanjay.png",
+          "image": "Images/sanjay.jpg",
           "category": "political"
         },
         {
           "id": "tdp-campaigns",
           "title": "TDP Election Campaigns",
           "description": "Strategy, digital outreach, and high-impact political ad films",
-          "image": "Images/cbn.png",
+          "image": "Images/cbn.jpg",
           "category": "political"
         },
         {
           "id": "ap-ipr",
-          "title": "AP I&PR Department",
+          "title": "Official government Video Films - I&PR",
           "description": "Official government video documentation and public messaging",
-          "image": "Images/ap-ipr.jpg",
+          "image": "Images/inpr.jpg",
           "category": "political"
         },
         {
           "id": "ap-digital-corp",
-          "title": "AP Digital Corporation & CRDA",
+          "title": "Shoots & Video Production",
           "description": "Modernizing state communication through digital assets and cinematic ad films",
-          "image": "Images/ap-digital-corp.jpg",
+          "image": "Images/apcrda.jpg",
           "category": "political"
         }
       ]
@@ -40,9 +40,9 @@
       "projects": [
         {
           "id": "etv-win",
-          "title": "ETV Win",
+          "title": "Social Media Promotions",
           "description": "Comprehensive brand and movie promotion strategies",
-          "image": "Images/etv.png",
+          "image": "Images/etv.jpg",
           "category": "entertainment"
         },
         {
@@ -56,14 +56,14 @@
           "id": "shekar-master",
           "title": "Shekar Master Social Media",
           "description": "Managing and scaling digital presence for celebrity talent",
-          "image": "Images/shekar.png",
+          "image": "Images/shekar.jpg",
           "category": "entertainment"
         },
         {
           "id": "meta-youtube",
           "title": "Meta & YouTube Content Partnership",
           "description": "Direct collaboration for platform-optimized content",
-          "image": "Images/meta-youtube.jpg",
+          "image": "Images/partnerships.jpg",
           "category": "entertainment"
         }
       ]
@@ -76,28 +76,28 @@
           "id": "3d-animation",
           "title": "3D Animation Channels",
           "description": "High-fidelity 3D storytelling for global YouTube audiences",
-          "image": "Images/roadheros.png",
+          "image": "Images/cars.jpg",
           "category": "animation"
         },
         {
           "id": "2d-animation",
           "title": "2D Animation Series",
           "description": "Creative, character-driven 2D content for specialized niche channels",
-          "image": "Images/spacetalks.png",
+          "image": "Images/spacetalks.jpg",
           "category": "animation"
         },
         {
           "id": "ai-content",
           "title": "AI-Generated Content",
           "description": "Utilizing generative AI to produce rapid, futuristic video solutions",
-          "image": "Images/snake.png",
+          "image": "Images/snake.jpg",
           "category": "animation"
         },
         {
           "id": "explainer-films",
-          "title": "Explainer & Concept Films",
+          "title": "Concept Films",
           "description": "Simplifying complex ideas through motion graphics",
-          "image": "Images/samhara.png",
+          "image": "Images/samhara.jpg",
           "category": "animation"
         }
       ]
@@ -110,21 +110,21 @@
           "id": "real-estate",
           "title": "Real Estate Ad Films",
           "description": "Specialized cinematic tours and marketing for property developers",
-          "image": "Images/realestate.png",
+          "image": "Images/realestate.jpg",
           "category": "commercial"
         },
         {
           "id": "corporate-stories",
           "title": "Corporate Brand Stories",
           "description": "Professional identity films for businesses across industries",
-          "image": "Images/corporate-stories.jpg",
+          "image": "Images/navya.jpg",
           "category": "commercial"
         },
         {
           "id": "performance-ads",
           "title": "Performance Marketing Ads",
           "description": "Conversion-focused video ads for YouTube and Social Media",
-          "image": "Images/performance-ads.jpg",
+          "image": "Images/cellpoint.jpg",
           "category": "commercial"
         }
       ]
