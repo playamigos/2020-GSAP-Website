@@ -771,10 +771,10 @@ main {
 
 .services-title {
     font-family: "Lilita One", sans-serif;
-    font-size: 80px;
+    font-size: 48px;
     text-align: center;
     color: #fff;
-    margin: 80px 0 40px;
+    margin: 40px 0 20px;
     position: relative;
     z-index: 2;
 }
@@ -789,66 +789,94 @@ main {
 
 .services-track {
     display: flex;
-    gap: 30px;
+    gap: 40px;
     padding: 0 50px;
     will-change: transform;
 }
 
 .service-tile {
     flex-shrink: 0;
-    width: 320px;
-    height: 400px;
-    background: var(--tile-color, #FF6B35);
-    border-radius: 20px;
-    padding: 40px 30px;
+    width: 300px;
+    height: 480px;
+    background: #050505;
+    border: 2px solid var(--tile-color, #FF6B35);
+    border-radius: 24px;
+    padding: 30px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     text-align: center;
-    border: 2px solid #000;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0,0,0,0.5);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     position: relative;
     overflow: hidden;
 }
 
 .service-tile::before {
-    content: '';
+    content: '2020';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
-    pointer-events: none;
+    left: 10px;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(-90deg);
+    color: var(--tile-color);
+    font-size: 10px;
+    letter-spacing: 3px;
+    opacity: 0.6;
+    font-weight: 700;
+    width: 100px; /* Ensure width for rotation center */
+    text-align: center;
+}
+
+.service-tile::after {
+    content: attr(data-category);
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translate(50%, -50%) rotate(90deg);
+    color: var(--tile-color);
+    font-size: 10px;
+    letter-spacing: 3px;
+    opacity: 0.6;
+    text-transform: uppercase;
+    font-weight: 700;
+    width: 100px;
+    text-align: center;
 }
 
 .service-tile:hover {
     transform: translateY(-10px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 30px var(--tile-color);
 }
 
 .tile-icon {
-    font-size: 64px;
-    margin-bottom: 30px;
-    color: #000;
-    text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+    font-size: 80px;
+    color: var(--tile-color);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
 }
 
 .tile-title {
-    font-family: "Lilita One", sans-serif;
-    font-size: 28px;
-    margin-bottom: 15px;
-    color: #000;
-    line-height: 1.2;
+    font-family: "Hanken Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--tile-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+    order: -1; /* Move to top */
 }
 
 .tile-desc {
-    font-size: 16px;
-    line-height: 1.6;
-    color: rgba(0, 0, 0, 0.8);
-    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #fff;
+    font-weight: 400;
+    opacity: 0.9;
+    max-width: 80%;
 }
 
 /* Transition Canvas */
