@@ -12,8 +12,8 @@ document.body.scrollTop = 0;
 // Loading Screen Animation
 function initLoadingScreen(onReveal) {
     const loadingScreen = document.querySelector('.loading-screen');
+    const loadingDigitWrappers = document.querySelectorAll('.loading-digit-wrapper');
     const loadingDigits = document.querySelectorAll('.loading-digit');
-    const digitGlows = document.querySelectorAll('.digit-glow');
     const loadingProgress = document.querySelector('.loading-progress');
     const loadingPercentage = document.querySelector('.loading-percentage');
     const loadingText = document.querySelector('.loading-text');
@@ -21,16 +21,21 @@ function initLoadingScreen(onReveal) {
     const loadingParticles = document.querySelector('.loading-particles');
     
     // Create floating particles
+    const colors = ['#7B61FF', '#FFC000', '#CCFF00', '#FF5722'];
+    
     for (let i = 0; i < 20; i++) {
         const particle = document.createElement('div');
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        
         particle.style.position = 'absolute';
         particle.style.width = Math.random() * 4 + 2 + 'px';
         particle.style.height = particle.style.width;
-        particle.style.background = 'rgba(255, 107, 53, 0.6)';
+        particle.style.background = color;
         particle.style.borderRadius = '50%';
         particle.style.left = Math.random() * 100 + '%';
         particle.style.top = Math.random() * 100 + '%';
-        particle.style.boxShadow = '0 0 10px rgba(255, 107, 53, 0.8)';
+        particle.style.boxShadow = `0 0 10px ${color}`;
+        particle.style.opacity = 0.6;
         loadingParticles.appendChild(particle);
         
         // Animate particle
@@ -48,8 +53,8 @@ function initLoadingScreen(onReveal) {
     // Main timeline
     const tl = gsap.timeline();
     
-    // Animate digits with 3D rotation effect
-    tl.to(loadingDigits, {
+    // Animate digit wrappers with 3D rotation effect
+    tl.to(loadingDigitWrappers, {
         opacity: 1,
         y: 0,
         rotateX: 0,
@@ -57,13 +62,6 @@ function initLoadingScreen(onReveal) {
         stagger: 0.1,
         ease: 'power3.out'
     })
-    .to(digitGlows, {
-        opacity: 1,
-        scale: 1.2,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: 'power2.out'
-    }, '<0.2')
     .to(loadingText, {
         opacity: 1,
         y: 0,
@@ -76,23 +74,13 @@ function initLoadingScreen(onReveal) {
         ease: 'power2.out'
     }, '-=0.3');
     
-    // Pulse animation for glows
-    gsap.to(digitGlows, {
-        scale: 1.3,
-        opacity: 0.8,
+    // Subtle scale animation for wrappers
+    gsap.to(loadingDigitWrappers, {
+        scale: 1.05,
         duration: 1.5,
         repeat: -1,
         yoyo: true,
         ease: 'sine.inOut',
-        stagger: 0.2
-    });
-    
-    // Rotate digits slightly
-    gsap.to(loadingDigits, {
-        rotateY: 360,
-        duration: 3,
-        repeat: -1,
-        ease: 'none',
         stagger: 0.2
     });
     
@@ -1305,16 +1293,71 @@ function initServicesSection() {
     // Position the projects section absolutely at the end of the scroll
     if (projectsSection) {
         projectsSection.style.top = projectsStartScroll + 'px';
-        // Ensure body is tall enough to scroll through projects
-        // We'll update this on load/resize ideally, but for now set it based on content
+        
+        const dividerSection = document.querySelector('.divider-section');
+        const contactSection = document.querySelector('.contact-section');
+        
+        // Ensure body is tall enough to scroll through projects and new sections
         const updateBodyHeight = () => {
             const projectsHeight = projectsSection.offsetHeight;
-            document.body.style.height = (projectsStartScroll + projectsHeight + 100) + 'px';
+            let totalHeight = projectsStartScroll + projectsHeight;
+            
+            if (dividerSection) {
+                dividerSection.style.position = 'absolute';
+                dividerSection.style.top = totalHeight + 'px';
+                dividerSection.style.width = '100%';
+                totalHeight += dividerSection.offsetHeight;
+            }
+            
+            if (contactSection) {
+                contactSection.style.position = 'absolute';
+                contactSection.style.top = totalHeight + 'px';
+                contactSection.style.width = '100%';
+                totalHeight += contactSection.offsetHeight;
+            }
+            
+            document.body.style.height = (totalHeight + 100) + 'px';
+            
+            // Refresh ScrollTrigger to account for new height
+            ScrollTrigger.refresh();
         };
+        
         // Run initially and after a short delay for layout
         updateBodyHeight();
         setTimeout(updateBodyHeight, 1000);
         window.addEventListener('resize', updateBodyHeight);
+        
+        // Divider Animation
+        if (dividerSection) {
+            const rowTop = dividerSection.querySelector('.row-top');
+            const rowBottom = dividerSection.querySelector('.row-bottom');
+            
+            if (rowTop) {
+                gsap.to(rowTop, {
+                    x: '0%', // Move right (from -20%)
+                    ease: 'none',
+                    scrollTrigger: {
+                        trigger: dividerSection,
+                        start: 'top bottom',
+                        end: 'bottom top',
+                        scrub: true
+                    }
+                });
+            }
+            
+            if (rowBottom) {
+                gsap.to(rowBottom, {
+                    x: '-80%', // Move left (from -50%)
+                    ease: 'none',
+                    scrollTrigger: {
+                        trigger: dividerSection,
+                        start: 'top bottom',
+                        end: 'bottom top',
+                        scrub: true
+                    }
+                });
+            }
+        }
     }
 
     ScrollTrigger.create({
