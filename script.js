@@ -950,7 +950,10 @@ function initAboutSection() {
 // Project Section Transition (Now transitions to Services)
 function initProjectSection() {
     // Load portfolio data dynamically
-    loadPortfolio();
+    loadPortfolio().then(() => {
+        // Initialize tooltip after portfolio items are loaded
+        initPortfolioTooltip();
+    });
     
     const canvas = document.getElementById('transition-canvas');
     const ctx = canvas.getContext('2d');
@@ -1668,12 +1671,30 @@ async function loadPortfolio() {
             projectItem.style.backgroundPosition = 'center';
             projectItem.style.backgroundColor = bgColor;
             
+            // Random animation properties for live effect
+            const driftDuration = 12 + Math.random() * 8; // 12-20s
+            const driftDelay = Math.random() * -10; // Start at different points
+            const driftX1 = (Math.random() - 0.5) * 6; // -3% to 3%
+            const driftY1 = (Math.random() - 0.5) * 6;
+            const driftX2 = (Math.random() - 0.5) * 6;
+            const driftY2 = (Math.random() - 0.5) * 6;
+            const driftX3 = (Math.random() - 0.5) * 6;
+            const driftY3 = (Math.random() - 0.5) * 6;
+            
+            projectItem.style.setProperty('--drift-duration', `${driftDuration}s`);
+            projectItem.style.setProperty('--drift-delay', `${driftDelay}s`);
+            projectItem.style.setProperty('--drift-x1', `${driftX1}%`);
+            projectItem.style.setProperty('--drift-y1', `${driftY1}%`);
+            projectItem.style.setProperty('--drift-x2', `${driftX2}%`);
+            projectItem.style.setProperty('--drift-y2', `${driftY2}%`);
+            projectItem.style.setProperty('--drift-x3', `${driftX3}%`);
+            projectItem.style.setProperty('--drift-y3', `${driftY3}%`);
+            
+            // Store title as data attribute for tooltip
+            projectItem.setAttribute('data-title', project.title);
+            
             projectItem.innerHTML = `
                 <div class="project-overlay"></div>
-                <div class="project-info">
-                    <h3>${project.title}</h3>
-                    <p>${project.description}</p>
-                </div>
             `;
             
             container.appendChild(projectItem);
@@ -1687,6 +1708,46 @@ async function loadPortfolio() {
             container.innerHTML = '<p style="color: white; text-align: center; width: 100%;">Unable to load portfolio items.</p>';
         }
     }
+}
+
+// Initialize portfolio tooltip
+function initPortfolioTooltip() {
+    const container = document.getElementById('portfolio-masonry');
+    if (!container) return;
+    
+    // Create tooltip element
+    const tooltip = document.createElement('div');
+    tooltip.className = 'portfolio-tooltip';
+    tooltip.style.display = 'none';
+    document.body.appendChild(tooltip);
+    
+    // Event delegation for project items
+    container.addEventListener('mouseover', (e) => {
+        const projectItem = e.target.closest('.project-item');
+        if (projectItem) {
+            const title = projectItem.getAttribute('data-title');
+            if (title) {
+                tooltip.textContent = title;
+                tooltip.style.display = 'block';
+            }
+        }
+    });
+    
+    container.addEventListener('mousemove', (e) => {
+        const projectItem = e.target.closest('.project-item');
+        if (projectItem && tooltip.style.display === 'block') {
+            // Position tooltip at bottom-right of cursor
+            tooltip.style.left = (e.clientX + 15) + 'px';
+            tooltip.style.top = (e.clientY + 15) + 'px';
+        }
+    });
+    
+    container.addEventListener('mouseout', (e) => {
+        const projectItem = e.target.closest('.project-item');
+        if (projectItem && !container.contains(e.relatedTarget?.closest?.('.project-item'))) {
+            tooltip.style.display = 'none';
+        }
+    });
 }
 
 function initMusicToggle() {

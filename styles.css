@@ -998,6 +998,16 @@ main {
     width: 100%;
 }
 
+.portfolio-footer {
+    font-family: "Hanken Grotesk", sans-serif;
+    font-size: 1.5rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin-top: 3rem;
+    font-weight: 700;
+    font-style: italic;
+}
+
 .masonry-container {
     column-count: 4;
     column-gap: 1.5rem;
@@ -1027,14 +1037,53 @@ main {
     border-radius: 15px;
     overflow: hidden;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, border 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
     margin-bottom: 1.5rem;
     break-inside: avoid;
+    border: 2px solid rgba(255, 255, 255, 1);
+}
+
+/* Animated background for live effect */
+.project-item::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 120%;
+    background-image: inherit;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+    animation: imageDrift var(--drift-duration, 15s) ease-in-out infinite;
+    animation-delay: var(--drift-delay, 0s);
+}
+
+@keyframes imageDrift {
+    0%, 100% {
+        transform: translate(0, 0) scale(1.1);
+    }
+    25% {
+        transform: translate(var(--drift-x1, 2%), var(--drift-y1, -3%)) scale(1.12);
+    }
+    50% {
+        transform: translate(var(--drift-x2, -3%), var(--drift-y2, 2%)) scale(1.1);
+    }
+    75% {
+        transform: translate(var(--drift-x3, 3%), var(--drift-y3, 3%)) scale(1.11);
+    }
 }
 
 .project-item:hover {
-    transform: scale(1.02);
-    z-index: 1; /* Ensure hovered item is on top */
+    transform: scale(1.05) !important;
+    z-index: 10;
+    border: 2px solid #FFD700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4), 0 0 30px rgba(255, 215, 0, 0.2);
+    filter: brightness(1.2);
+}
+
+.project-item:hover::before {
+    animation-play-state: paused;
 }
 
 .project-overlay {
@@ -1045,39 +1094,44 @@ main {
     height: 100%;
     background: rgba(0, 0, 0, 0.3);
     transition: background 0.3s ease;
+    z-index: 1;
 }
 
 .project-item:hover .project-overlay {
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.4);
 }
 
 .project-info {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 2rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-    transform: translateY(100%);
-    transition: transform 0.3s ease;
-    z-index: 2;
+    display: none; /* Hidden by default */
 }
 
-.project-item:hover .project-info {
-    transform: translateY(0);
-}
-
-.project-info h3 {
+/* Portfolio Tooltip */
+.portfolio-tooltip {
+    position: fixed;
+    background: rgba(0, 0, 0, 0.9);
     color: #fff;
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    font-family: "Lilita One", sans-serif;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    pointer-events: none;
+    z-index: 10000;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    animation: tooltipFadeIn 0.2s ease;
 }
 
-.project-info p {
-    color: #ccc;
-    font-size: 1rem;
-    line-height: 1.4;
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 /* Special Tile Styling */
