@@ -935,6 +935,9 @@ function initAboutSection() {
 
 // Project Section Transition (Now transitions to Services)
 function initProjectSection() {
+    // Load portfolio data dynamically
+    loadPortfolio();
+    
     const canvas = document.getElementById('transition-canvas');
     const ctx = canvas.getContext('2d');
     const servicesSection = document.querySelector('.services-section');
@@ -1382,7 +1385,7 @@ function initServicesSection() {
 
                 // Fade out the last tile instead of zooming
                 gsap.set(lastTile, { 
-                    scale: 1.3 + (progress * 0.5), // Slight scale
+                    scale: 1.3 + (progress * 25),
                     zIndex: 1000,
                     opacity: 1 - progress, // Fade out
                     filter: 'blur(0px)'
@@ -1429,6 +1432,10 @@ function initServicesSection() {
                     gsap.set(projectsSection, {
                         y: 0
                     });
+                    
+                    // Background opacity transition (0 -> 1 as we scroll through portfolio)
+                    const bgOpacity = Math.min(1, progress * 1.5); // Reaches full opacity at ~40% progress
+                    projectsSection.style.setProperty('--bg-opacity', bgOpacity);
                     
                     // 1. Fade in Title first (0.05 - 0.25)
                     if (projectsTitle) {
@@ -1612,4 +1619,58 @@ function initCursorTrail() {
             particle.remove();
         }, 800);
     });
+}
+
+async function loadPortfolio() {
+    try {
+        const response = await fetch('portfolio.json');
+        const data = await response.json();
+        
+        const container = document.getElementById('portfolio-masonry');
+        if (!container) return;
+        
+        // Color palette for projects
+        const colors = [
+            '#00CED1', '#F5F5DC', '#FFD700', '#FFA500', '#32CD32',
+            '#FF4500', '#1E90FF', '#DA70D6', '#FF69B4', '#333333'
+        ];
+        
+        let colorIndex = 0;
+        
+        // Flatten all projects from all categories
+        const allProjects = data.categories.flatMap(cat => cat.projects);
+        
+        // Generate project items
+        allProjects.forEach((project, index) => {
+            const height = Math.floor(Math.random() * 200) + 250; // Random height 250-450px
+            const bgColor = colors[colorIndex % colors.length];
+            colorIndex++;
+            
+            const projectItem = document.createElement('div');
+            projectItem.className = 'project-item';
+            projectItem.style.height = height + 'px';
+            projectItem.style.backgroundImage = `url('${project.image}')`;
+            projectItem.style.backgroundSize = 'cover';
+            projectItem.style.backgroundPosition = 'center';
+            projectItem.style.backgroundColor = bgColor;
+            
+            projectItem.innerHTML = `
+                <div class="project-overlay"></div>
+                <div class="project-info">
+                    <h3>${project.title}</h3>
+                    <p>${project.description}</p>
+                </div>
+            `;
+            
+            container.appendChild(projectItem);
+        });
+        
+    } catch (error) {
+        console.error('Error loading portfolio:', error);
+        // Fallback: show error message
+        const container = document.getElementById('portfolio-masonry');
+        if (container) {
+            container.innerHTML = '<p style="color: white; text-align: center; width: 100%;">Unable to load portfolio items.</p>';
+        }
+    }
 }

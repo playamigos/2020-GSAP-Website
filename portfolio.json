@@ -1,0 +1,133 @@
+{
+  "categories": [
+    {
+      "name": "Political Campaigns & Public Relations",
+      "description": "Strategizing and executing high-stakes communication for leaders and government bodies",
+      "projects": [
+        {
+          "id": "bandi-sanjay-yatra",
+          "title": "Bandi Sanjay Praja Sangrama Yatra",
+          "description": "Full-scale digital and ground campaign management",
+          "image": "Images/bandi-sanjay-yatra.jpg",
+          "category": "political"
+        },
+        {
+          "id": "tdp-campaigns",
+          "title": "TDP Election Campaigns",
+          "description": "Strategy, digital outreach, and high-impact political ad films",
+          "image": "Images/tdp-campaigns.jpg",
+          "category": "political"
+        },
+        {
+          "id": "ap-ipr",
+          "title": "AP I&PR Department",
+          "description": "Official government video documentation and public messaging",
+          "image": "Images/ap-ipr.jpg",
+          "category": "political"
+        },
+        {
+          "id": "ap-digital-corp",
+          "title": "AP Digital Corporation & CRDA",
+          "description": "Modernizing state communication through digital assets and cinematic ad films",
+          "image": "Images/ap-digital-corp.jpg",
+          "category": "political"
+        }
+      ]
+    },
+    {
+      "name": "Digital Entertainment & Media Promotions",
+      "description": "Driving buzz and engagement for the entertainment industry and social icons",
+      "projects": [
+        {
+          "id": "etv-win",
+          "title": "ETV Win",
+          "description": "Comprehensive brand and movie promotion strategies",
+          "image": "Images/etv-win.jpg",
+          "category": "entertainment"
+        },
+        {
+          "id": "movie-promotions",
+          "title": "Movie Promotions",
+          "description": "Digital marketing and content buzz for upcoming theatrical releases",
+          "image": "Images/movie-promotions.jpg",
+          "category": "entertainment"
+        },
+        {
+          "id": "shekar-master",
+          "title": "Shekar Master Social Media",
+          "description": "Managing and scaling digital presence for celebrity talent",
+          "image": "Images/shekar-master.jpg",
+          "category": "entertainment"
+        },
+        {
+          "id": "meta-youtube",
+          "title": "Meta & YouTube Content Partnership",
+          "description": "Direct collaboration for platform-optimized content",
+          "image": "Images/meta-youtube.jpg",
+          "category": "entertainment"
+        }
+      ]
+    },
+    {
+      "name": "Animation & AI Content Hub",
+      "description": "Leveraging the latest technology to create scalable, engaging, and imaginative content",
+      "projects": [
+        {
+          "id": "3d-animation",
+          "title": "3D Animation Channels",
+          "description": "High-fidelity 3D storytelling for global YouTube audiences",
+          "image": "Images/3d-animation.jpg",
+          "category": "animation"
+        },
+        {
+          "id": "2d-animation",
+          "title": "2D Animation Series",
+          "description": "Creative, character-driven 2D content for specialized niche channels",
+          "image": "Images/2d-animation.jpg",
+          "category": "animation"
+        },
+        {
+          "id": "ai-content",
+          "title": "AI-Generated Content",
+          "description": "Utilizing generative AI to produce rapid, futuristic video solutions",
+          "image": "Images/ai-content.jpg",
+          "category": "animation"
+        },
+        {
+          "id": "explainer-films",
+          "title": "Explainer & Concept Films",
+          "description": "Simplifying complex ideas through motion graphics",
+          "image": "Images/explainer-films.jpg",
+          "category": "animation"
+        }
+      ]
+    },
+    {
+      "name": "Commercial Ads & Corporate Campaigns",
+      "description": "Connecting brands with customers through high-production value storytelling",
+      "projects": [
+        {
+          "id": "real-estate",
+          "title": "Real Estate Ad Films",
+          "description": "Specialized cinematic tours and marketing for property developers",
+          "image": "Images/real-estate.jpg",
+          "category": "commercial"
+        },
+        {
+          "id": "corporate-stories",
+          "title": "Corporate Brand Stories",
+          "description": "Professional identity films for businesses across industries",
+          "image": "Images/corporate-stories.jpg",
+          "category": "commercial"
+        },
+        {
+          "id": "performance-ads",
+          "title": "Performance Marketing Ads",
+          "description": "Conversion-focused video ads for YouTube and Social Media",
+          "image": "Images/performance-ads.jpg",
+          "category": "commercial"
+        }
+      ]
+    }
+  ]
+}
