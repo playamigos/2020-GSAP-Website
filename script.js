@@ -265,14 +265,14 @@ function initHeader() {
             // Calculate actual scroll positions based on site structure
             // Home: 0vh
             // About: ~4.5vh (after shapes animation)
-            // Services: ~8.5vh (start of horizontal scroll)
+            // Services: ~4.5vh (start of horizontal scroll where first tile is centered)
             // Portfolio: ~9.5vh (after services)
             // Contact: ~9.5vh + portfolio height + divider
             
             const scrollMap = {
                 '#home': 0,
                 '#portfolio': window.innerHeight * 9.5, // Start of projects section
-                '#services': window.innerHeight * 8.5,  // Start of services horizontal scroll
+                '#services': window.innerHeight * 4.5,  // Start of services horizontal scroll with first tile centered
                 '#contact': () => {
                     // Contact is after portfolio and divider
                     const projectsSection = document.querySelector('.projects-section');
