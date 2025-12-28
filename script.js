@@ -173,6 +173,9 @@ document.addEventListener('DOMContentLoaded', () => {
         initAboutSection();
         initProjectSection();
         initServicesSection();
+        initContactSection();
+        initHomeParticles();
+        initCursorTrail();
     });
 });
 
@@ -1482,4 +1485,131 @@ function initServicesSection() {
     const initialEvent = { progress: 0 };
     // We can't easily call the onUpdate manually without the self object, 
     // but the ScrollTrigger will fire on init usually.
+}
+
+function initContactSection() {
+    const pills = document.querySelectorAll('.contact-pill[data-copy]');
+    if (!pills.length) return;
+
+    const showCopied = (pill) => {
+        pill.classList.add('is-copied');
+        window.clearTimeout(pill.__copiedTimer);
+        pill.__copiedTimer = window.setTimeout(() => {
+            pill.classList.remove('is-copied');
+        }, 1200);
+    };
+
+    pills.forEach((pill) => {
+        pill.addEventListener('click', async (e) => {
+            const value = pill.getAttribute('data-copy');
+            if (!value) return;
+
+            // Allow normal navigation if user is trying to open mail/phone
+            // But also support quick copy with a simple click.
+            // If you want navigation only, remove preventDefault.
+            e.preventDefault();
+
+            try {
+                await navigator.clipboard.writeText(value);
+                showCopied(pill);
+            } catch {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = value;
+                textarea.setAttribute('readonly', '');
+                textarea.style.position = 'absolute';
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showCopied(pill);
+            }
+        });
+    });
+}
+
+function initHomeParticles() {
+    const homeParticles = document.querySelector('.home-particles');
+    if (!homeParticles) return;
+    
+    const colors = ['#7B61FF', '#FFC000', '#CCFF00', '#FF5722'];
+    
+    // Create 30 floating particles for home section
+    for (let i = 0; i < 30; i++) {
+        const particle = document.createElement('div');
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const size = Math.random() * 4 + 2;
+        
+        particle.style.position = 'absolute';
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        particle.style.background = color;
+        particle.style.borderRadius = '50%';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.boxShadow = `0 0 10px ${color}`;
+        particle.style.opacity = 0.6;
+        homeParticles.appendChild(particle);
+        
+        // Animate particle floating up
+        gsap.to(particle, {
+            y: -100 - Math.random() * 200,
+            x: (Math.random() - 0.5) * 100,
+            opacity: 0,
+            duration: 2 + Math.random() * 3,
+            repeat: -1,
+            delay: Math.random() * 2,
+            ease: 'power1.out'
+        });
+    }
+}
+
+function initCursorTrail() {
+    const cursorParticles = document.querySelector('.cursor-particles');
+    if (!cursorParticles) return;
+    
+    const colors = ['#7B61FF', '#FFC000', '#CCFF00', '#FF5722'];
+    let lastX = 0;
+    let lastY = 0;
+    let lastTime = 0;
+    const throttleMs = 30; // Create particle every 30ms max
+    
+    document.addEventListener('mousemove', (e) => {
+        const now = Date.now();
+        
+        // Throttle particle creation
+        if (now - lastTime < throttleMs) return;
+        
+        // Only create if mouse moved significantly
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < 5) return;
+        
+        lastX = e.clientX;
+        lastY = e.clientY;
+        lastTime = now;
+        
+        // Create particle
+        const particle = document.createElement('div');
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const size = Math.random() * 6 + 3;
+        
+        particle.className = 'cursor-particle';
+        particle.style.left = e.clientX + 'px';
+        particle.style.top = e.clientY + 'px';
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        particle.style.background = color;
+        particle.style.boxShadow = `0 0 10px ${color}`;
+        
+        cursorParticles.appendChild(particle);
+        
+        // Remove particle after animation completes
+        setTimeout(() => {
+            particle.remove();
+        }, 800);
+    });
 }
