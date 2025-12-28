@@ -700,48 +700,7 @@ main {
     color: #fff;
 }
 
-.projects-title {
-    font-family: "Lilita One", sans-serif;
-    font-size: 80px;
-    margin-bottom: 60px;
-    text-align: center;
-    color: #fff;
-}
-
-.project-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-}
-
-.project-card {
-    background: #1a1a1a;
-    border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.3s ease;
-}
-
-.project-card:hover {
-    transform: translateY(-10px);
-}
-
-.project-image {
-    height: 250px;
-    background: #333;
-}
-
-.project-info {
-    padding: 20px;
-}
-
-.project-info h3 {
-    font-size: 24px;
-    margin-bottom: 8px;
-}
-
-.project-info p {
-    color: #888;
-}
+/* Old Projects CSS removed */
 
 /* Services Section */
 .services-section {
@@ -894,42 +853,67 @@ main {
 }
 /* Projects Section */
 .projects-section {
-    position: fixed;
-    top: 0;
+    position: absolute;
     left: 0;
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
+    height: auto;
     background-color: #050505;
-    z-index: 20;
+    z-index: 1001;
     opacity: 0;
     visibility: hidden;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    pointer-events: none;
+    padding-top: 100px;
 }
 
 .projects-container {
     width: 90%;
     max-width: 1200px;
-    height: 80vh;
+    height: auto;
     display: flex;
     flex-direction: column;
+    padding-bottom: 100px;
 }
 
 .projects-title {
+    font-family: "Lilita One", sans-serif;
     font-size: 4rem;
     color: #fff;
     margin-bottom: 2rem;
-    font-family: 'Syncopate', sans-serif;
     text-transform: uppercase;
+    text-align: center;
 }
 
 .projects-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-    flex: 1;
+    flex: none;
+    overflow: visible;
+    width: 100%;
+}
+
+.masonry-container {
+    column-count: 4;
+    column-gap: 1.5rem;
+    width: 100%;
+}
+
+.projects-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.projects-grid::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.projects-grid::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.projects-grid::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .project-item {
@@ -937,19 +921,17 @@ main {
     border-radius: 15px;
     overflow: hidden;
     cursor: pointer;
-    border: 1px solid rgba(255, 255, 255, 0.1);
     transition: transform 0.3s ease;
+    margin-bottom: 1.5rem;
+    break-inside: avoid;
 }
 
 .project-item:hover {
     transform: scale(1.02);
+    z-index: 1; /* Ensure hovered item is on top */
 }
 
-.project-image {
-    width: 100%;
-    height: 100%;
-    transition: opacity 0.3s ease;
-}
+/* .project-image removed as it is no longer used */
 
 .project-info {
     position: absolute;
@@ -1026,4 +1008,22 @@ main {
 @keyframes pulseArrow {
     0%, 100% { opacity: 0.3; transform: translateX(0); }
     50% { opacity: 0.8; transform: translateX(-10px); }
+}
+/* Floating Arrow */
+.floating-arrow {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2000;
+    color: #fff;
+    font-size: 80px;
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Ensure it renders sharply */
+    -webkit-font-smoothing: antialiased;
+    backface-visibility: hidden;
 }

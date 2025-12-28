@@ -1300,6 +1300,23 @@ function initServicesSection() {
     
     // Transition to Projects Section
     // This triggers when we scroll PAST the end of the services scroll
+    const projectsStartScroll = window.innerHeight * 9.5;
+    
+    // Position the projects section absolutely at the end of the scroll
+    if (projectsSection) {
+        projectsSection.style.top = projectsStartScroll + 'px';
+        // Ensure body is tall enough to scroll through projects
+        // We'll update this on load/resize ideally, but for now set it based on content
+        const updateBodyHeight = () => {
+            const projectsHeight = projectsSection.offsetHeight;
+            document.body.style.height = (projectsStartScroll + projectsHeight + 100) + 'px';
+        };
+        // Run initially and after a short delay for layout
+        updateBodyHeight();
+        setTimeout(updateBodyHeight, 1000);
+        window.addEventListener('resize', updateBodyHeight);
+    }
+
     ScrollTrigger.create({
         trigger: document.body,
         start: () => (window.innerHeight * 8.5) + "px top", // 4.5 + 4 (end of services)
@@ -1309,44 +1326,45 @@ function initServicesSection() {
             const progress = self.progress;
             const lastTile = tiles[tiles.length - 1];
             const servicesTitle = document.querySelector('.services-title');
+            const projectsTitle = document.querySelector('.projects-title');
             const projectItems = document.querySelectorAll('.project-item');
+            const floatingArrow = document.querySelector('.floating-arrow');
             
             if (lastTile && projectsSection) {
                 const tileText = lastTile.querySelectorAll('.tile-title, .tile-desc, .service-tile::before, .service-tile::after');
                 const tileArrow = lastTile.querySelector('.tile-icon');
 
-                // Scale up the last tile to fill screen
-                // We need a massive scale to cover the screen from the center
-                // Start scaling from 1.3 (max scale from previous anim)
-                const scale = 1.3 + (progress * 25); 
-                
+                // Fade out the last tile instead of zooming
                 gsap.set(lastTile, { 
-                    scale: scale,
+                    scale: 1.3 + (progress * 0.5), // Slight scale
                     zIndex: 1000,
-                    opacity: 1,
+                    opacity: 1 - progress, // Fade out
                     filter: 'blur(0px)'
                 });
 
                 // Fade out Services Title & Tile Text immediately
+                // Faster fade out to prevent pixelation visibility
                 if (servicesTitle) {
-                    gsap.set(servicesTitle, { opacity: 1 - (progress * 8) });
+                    gsap.set(servicesTitle, { opacity: 1 - (progress * 15) });
                 }
-                gsap.set(tileText, { opacity: 1 - (progress * 8) });
+                gsap.set(tileText, { opacity: 1 - (progress * 15) });
 
-                // Handle Arrow: Keep it visible longer, move down, counter-scale
-                if (tileArrow) {
-                    // Counter-scale to keep arrow roughly same visual size
-                    // As tile scales up, we scale arrow down
-                    const counterScale = 1 / (scale / 1.3); 
+                // Handle Arrow: Switch to floating arrow to avoid pixelation
+                if (tileArrow && floatingArrow) {
+                    // Hide the real arrow inside the scaling tile
+                    gsap.set(tileArrow, { opacity: 0 });
                     
-                    gsap.set(tileArrow, {
-                        scale: counterScale,
-                        y: progress * 300, // Move down relative to tile (which is scaling)
-                        opacity: 1 - (progress * 3) // Fade out by 33%
+                    // Show and animate the floating arrow
+                    // It starts at center (top: 50%) and moves UP
+                    // Fade out as it moves up
+                    gsap.set(floatingArrow, {
+                        opacity: 1 - (progress * 2), // Fade out slowly
+                        y: -progress * window.innerHeight * 0.5, // Move UP (negative y)
+                        scale: 1.3 // Match the tile's initial scale (1.3)
                     });
                 }
                 
-                // Hide other tiles to prevent them from showing on edges
+                // Hide other tiles
                 if (progress > 0.05) {
                     tiles.forEach((t, i) => {
                         if (i !== tiles.length - 1) {
@@ -1356,27 +1374,44 @@ function initServicesSection() {
                 }
 
                 // Reveal Projects Section
-                // As the black tile expands, we fade in the projects section
-                if (progress > 0.2) {
+                // Start revealing earlier to overlap with arrow movement
+                if (progress > 0.01) {
                     projectsSection.style.visibility = 'visible';
-                    projectsSection.style.pointerEvents = 'auto';
                     projectsSection.style.opacity = 1;
                     
-                    // Staggered Fade In for Project Items
-                    // Map progress 0.2 -> 1.0 to item opacity
-                    const projectProgress = (progress - 0.2) / 0.8;
+                    // Remove manual pinning to let it slide up naturally from bottom
+                    gsap.set(projectsSection, {
+                        y: 0
+                    });
+                    
+                    // 1. Fade in Title first (0.05 - 0.25)
+                    if (projectsTitle) {
+                        const titleProgress = (progress - 0.05) / 0.2;
+                        gsap.set(projectsTitle, {
+                            opacity: Math.max(0, Math.min(1, titleProgress)),
+                            y: 50 * (1 - Math.max(0, Math.min(1, titleProgress)))
+                        });
+                    }
+                    
+                    // 2. Staggered Fade In for Project Items (0.1 - 0.8)
+                    // Map progress range to item opacity
+                    const itemsStart = 0.1;
+                    const itemsEnd = 0.8;
+                    const totalItemsProgress = (progress - itemsStart) / (itemsEnd - itemsStart);
                     
                     projectItems.forEach((item, i) => {
                         // Stagger logic: items appear one by one
-                        const start = i * 0.15;
-                        const end = start + 0.4;
-                        const itemProgress = (projectProgress - start) / (end - start);
+                        // Spread all items across the available timeline
+                        const itemStart = (i / projectItems.length) * 0.8; 
+                        const itemEnd = itemStart + 0.2;
+                        
+                        const itemProgress = (totalItemsProgress - itemStart) / (itemEnd - itemStart);
                         const clamped = Math.max(0, Math.min(1, itemProgress));
                         
                         gsap.set(item, {
                             opacity: clamped,
                             y: 100 * (1 - clamped), // Slide up from 100px
-                            scale: 0.9 + (0.1 * clamped) // Subtle scale up
+                            scale: 0.9 + (0.1 * clamped)
                         });
                     });
 
@@ -1388,9 +1423,12 @@ function initServicesSection() {
                     }
                 } else {
                     projectsSection.style.visibility = 'hidden';
-                    projectsSection.style.pointerEvents = 'none';
                     projectsSection.style.opacity = 0;
                     servicesSection.style.opacity = 1;
+                    
+                    // Reset floating arrow if scrolling back
+                    if (floatingArrow) gsap.set(floatingArrow, { opacity: 0 });
+                    if (tileArrow) gsap.set(tileArrow, { opacity: 1 });
                 }
             }
         }
