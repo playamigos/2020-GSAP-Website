@@ -20,7 +20,7 @@ body {
     overflow-x: hidden;
     line-height: 1.6;
     font-optical-sizing: auto;
-    height: 800vh; /* Ensure enough scroll space for all animations */
+    height: 1200vh; /* Ensure enough scroll space for all animations */
 }
 
 /* Hide main content initially until loading screen completes */
@@ -776,15 +776,16 @@ main {
     color: #fff;
     margin: 40px 0 20px;
     position: relative;
-    z-index: 2;
+    z-index: 1; /* Lower z-index than tiles */
 }
 
 .services-scroll-wrapper {
     flex: 1;
-    overflow: hidden;
+    overflow: visible; /* Allow tiles to scale without clipping */
     position: relative;
     display: flex;
     align-items: center;
+    z-index: 10; /* Ensure tiles are above the title */
 }
 
 .services-track {
@@ -808,9 +809,10 @@ main {
     justify-content: space-between;
     text-align: center;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0,0,0,0.5);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: box-shadow 0.3s ease;
     position: relative;
     overflow: hidden;
+    will-change: transform, opacity;
 }
 
 .service-tile::before {
@@ -889,4 +891,139 @@ main {
     z-index: 100;
     pointer-events: none;
     opacity: 1;
+}
+/* Projects Section */
+.projects-section {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: #050505;
+    z-index: 20;
+    opacity: 0;
+    visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.projects-container {
+    width: 90%;
+    max-width: 1200px;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.projects-title {
+    font-size: 4rem;
+    color: #fff;
+    margin-bottom: 2rem;
+    font-family: 'Syncopate', sans-serif;
+    text-transform: uppercase;
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    flex: 1;
+}
+
+.project-item {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.project-item:hover {
+    transform: scale(1.02);
+}
+
+.project-image {
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.3s ease;
+}
+
+.project-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 2rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.project-item:hover .project-info {
+    transform: translateY(0);
+}
+
+.project-info h3 {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.project-info p {
+    color: #ccc;
+    font-size: 1rem;
+}
+
+/* Special Tile Styling */
+.service-tile.special-tile {
+    background: #000;
+    border-color: #FFD700; /* Golden border always */
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.6); /* Strong golden glow always */
+}
+
+.service-tile.special-tile:hover {
+    box-shadow: 0 0 60px rgba(255, 215, 0, 0.8); /* Even stronger on hover */
+}
+
+.service-tile.special-tile .tile-title,
+.service-tile.special-tile .tile-desc,
+.service-tile.special-tile .tile-icon {
+    color: #fff;
+}
+
+.service-tile.special-tile::before,
+.service-tile.special-tile::after {
+    color: #fff;
+}
+/* Scroll Hint Arrow */
+.scroll-hint-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 24px;
+    margin-right: 0;
+    animation: pulseArrow 2s infinite;
+    flex-shrink: 0;
+    width: 80px; /* Fixed width for calculation */
+}
+
+.scroll-hint-arrow i {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.scroll-hint-arrow span {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+@keyframes pulseArrow {
+    0%, 100% { opacity: 0.3; transform: translateX(0); }
+    50% { opacity: 0.8; transform: translateX(-10px); }
 }

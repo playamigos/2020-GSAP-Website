@@ -1200,61 +1200,205 @@ function initServicesSection() {
     const servicesSection = document.querySelector('.services-section');
     const track = document.querySelector('.services-track');
     const tiles = Array.from(document.querySelectorAll('.service-tile'));
+    const projectsSection = document.querySelector('.projects-section');
     
     if (!servicesSection || !track || tiles.length === 0) return;
     
-    // Clone tiles for infinite loop effect
-    const clone = track.cloneNode(true);
-    track.parentNode.appendChild(clone);
+    // Configuration
+    const tileWidth = 300; // Match CSS width
+    const gap = 40; // Match CSS gap
+    const totalTileWidth = tileWidth + gap;
     
-    // Calculate total width
-    const tileWidth = 320 + 30; // tile width + gap
-    const totalWidth = tiles.length * tileWidth;
+    // Calculate start position to center the first tile
+    // Track starts at 0. We want first tile (0px) to be at center.
+    // Structure: Padding(50) | Arrow(80) | Gap(40) | Tile1(300) ...
+    const arrowWidth = 80;
+    const arrowGap = 40; // Flex gap
+    const trackPadding = 50;
+    
+    // Distance from start of track (inside padding) to start of first tile
+    const firstTileStartOffset = arrowWidth + arrowGap;
+    
+    // Distance from left edge of screen to center of first tile
+    const offsetToFirstTileCenter = trackPadding + firstTileStartOffset + (tileWidth / 2);
+    
+    // Correction factor: Shift left to fix visual centering
+    // If tiles are to the right of center, we need to subtract more (move track left)
+    const correction = 45; 
+    const startX = (window.innerWidth / 2) - offsetToFirstTileCenter - correction;
+    
+    // Calculate total scroll distance to center the last tile
+    // Last tile position is at index * totalTileWidth
+    const lastTilePosition = (tiles.length - 1) * totalTileWidth;
+    
+    // Pre-calculate center point for performance
+    // Adjust center point by correction to match visual center
+    const centerPoint = (window.innerWidth / 2) - correction;
+
+    // Function to update tile positions and scaling
+    const updateTiles = (progress) => {
+        // Horizontal scroll: Move from startX to (startX - lastTilePosition)
+        const currentX = startX - (progress * lastTilePosition);
+        gsap.set(track, { x: currentX });
+        
+        // Smooth Center Scaling Effect
+        tiles.forEach((tile, i) => {
+            // Calculate where this tile is relative to the track start (excluding padding)
+            // Tile i pos = FirstTileStart + (i * (TileWidth + Gap))
+            const tileRelativePos = firstTileStartOffset + (i * totalTileWidth);
+            
+            // Calculate its current screen position
+            // ScreenPos = CurrentTrackX + Padding + TileRelativePos + HalfTileWidth
+            // Note: We don't include 'correction' here because it's part of currentX
+            // But since currentX includes the correction shift, the tileScreenPos is the ACTUAL screen position.
+            // And since we shifted the track left to make it LOOK centered, the "Visual Center" is actually shifted left.
+            // So we compare against (Center - Correction).
+            const tileScreenPos = currentX + trackPadding + tileRelativePos + (tileWidth / 2);
+            
+            const distance = Math.abs(centerPoint - tileScreenPos);
+            
+            // Calculate scale based on distance from center
+            // Max scale 1.3, Min scale 0.9
+            // Effect range: 600px from center
+            let scale = 1.3 - (distance / 600);
+            scale = Math.max(0.9, Math.min(1.3, scale));
+            
+            // Z-index: higher for centered items
+            const zIndex = Math.round(scale * 100);
+            
+            // Opacity: fade out distant items slightly
+            let opacity = 1 - (distance / 1200);
+            opacity = Math.max(0.4, Math.min(1, opacity));
+            
+            // Apply transforms
+            gsap.set(tile, { 
+                scale: scale, 
+                zIndex: zIndex,
+                opacity: opacity,
+                filter: `blur(${Math.max(0, (distance - 200)/100)}px)`
+            });
+        });
+    };
+    
+    // Initial setup - Run ONCE immediately to set initial state (centered & scaled)
+    updateTiles(0);
     
     // Create scroll animation
     const scrollTl = gsap.timeline({
         scrollTrigger: {
             id: 'servicesScroll',
             trigger: document.body,
-            // Start right after the arrow transition (which ends at 4.5vh)
+            // Start right after the arrow transition
             start: () => (window.innerHeight * 4.5) + "px top",
-            end: () => "+=" + (window.innerHeight * 3),
-            scrub: true,
+            end: () => "+=" + (window.innerHeight * 4), // Adjust length as needed
+            scrub: 0.5, // Add smoothing to reduce jitter
             onUpdate: (self) => {
-                const progress = self.progress;
-                
-                // Horizontal scroll effect (infinite loop)
-                const scrollAmount = progress * totalWidth * 2;
-                const xPos = -(scrollAmount % totalWidth);
-                
-                gsap.set([track, clone], {
-                    x: xPos
-                });
+                updateTiles(self.progress);
             }
         }
     });
     
-    // Add stagger animation for tiles on entrance
-    tiles.forEach((tile, i) => {
-        gsap.fromTo(tile, 
-            { 
-                opacity: 0, 
-                y: 50,
-                scale: 0.8
-            },
-            {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                duration: 0.6,
-                ease: 'back.out(1.7)',
-                scrollTrigger: {
-                    trigger: document.body,
-                    start: () => (window.innerHeight * 4.5) + "px top",
-                    end: () => (window.innerHeight * 4.8) + "px top",
-                    scrub: true
+    // Transition to Projects Section
+    // This triggers when we scroll PAST the end of the services scroll
+    ScrollTrigger.create({
+        trigger: document.body,
+        start: () => (window.innerHeight * 8.5) + "px top", // 4.5 + 4 (end of services)
+        end: () => "+=" + window.innerHeight,
+        scrub: true,
+        onUpdate: (self) => {
+            const progress = self.progress;
+            const lastTile = tiles[tiles.length - 1];
+            const servicesTitle = document.querySelector('.services-title');
+            const projectItems = document.querySelectorAll('.project-item');
+            
+            if (lastTile && projectsSection) {
+                const tileText = lastTile.querySelectorAll('.tile-title, .tile-desc, .service-tile::before, .service-tile::after');
+                const tileArrow = lastTile.querySelector('.tile-icon');
+
+                // Scale up the last tile to fill screen
+                // We need a massive scale to cover the screen from the center
+                // Start scaling from 1.3 (max scale from previous anim)
+                const scale = 1.3 + (progress * 25); 
+                
+                gsap.set(lastTile, { 
+                    scale: scale,
+                    zIndex: 1000,
+                    opacity: 1,
+                    filter: 'blur(0px)'
+                });
+
+                // Fade out Services Title & Tile Text immediately
+                if (servicesTitle) {
+                    gsap.set(servicesTitle, { opacity: 1 - (progress * 8) });
+                }
+                gsap.set(tileText, { opacity: 1 - (progress * 8) });
+
+                // Handle Arrow: Keep it visible longer, move down, counter-scale
+                if (tileArrow) {
+                    // Counter-scale to keep arrow roughly same visual size
+                    // As tile scales up, we scale arrow down
+                    const counterScale = 1 / (scale / 1.3); 
+                    
+                    gsap.set(tileArrow, {
+                        scale: counterScale,
+                        y: progress * 300, // Move down relative to tile (which is scaling)
+                        opacity: 1 - (progress * 3) // Fade out by 33%
+                    });
+                }
+                
+                // Hide other tiles to prevent them from showing on edges
+                if (progress > 0.05) {
+                    tiles.forEach((t, i) => {
+                        if (i !== tiles.length - 1) {
+                            gsap.set(t, { opacity: 1 - (progress * 10) });
+                        }
+                    });
+                }
+
+                // Reveal Projects Section
+                // As the black tile expands, we fade in the projects section
+                if (progress > 0.2) {
+                    projectsSection.style.visibility = 'visible';
+                    projectsSection.style.pointerEvents = 'auto';
+                    projectsSection.style.opacity = 1;
+                    
+                    // Staggered Fade In for Project Items
+                    // Map progress 0.2 -> 1.0 to item opacity
+                    const projectProgress = (progress - 0.2) / 0.8;
+                    
+                    projectItems.forEach((item, i) => {
+                        // Stagger logic: items appear one by one
+                        const start = i * 0.15;
+                        const end = start + 0.4;
+                        const itemProgress = (projectProgress - start) / (end - start);
+                        const clamped = Math.max(0, Math.min(1, itemProgress));
+                        
+                        gsap.set(item, {
+                            opacity: clamped,
+                            y: 100 * (1 - clamped), // Slide up from 100px
+                            scale: 0.9 + (0.1 * clamped) // Subtle scale up
+                        });
+                    });
+
+                    // Hide services section container when fully covered
+                    if (progress > 0.8) {
+                        servicesSection.style.opacity = 0;
+                    } else {
+                        servicesSection.style.opacity = 1;
+                    }
+                } else {
+                    projectsSection.style.visibility = 'hidden';
+                    projectsSection.style.pointerEvents = 'none';
+                    projectsSection.style.opacity = 0;
+                    servicesSection.style.opacity = 1;
                 }
             }
-        );
+        }
     });
+    
+    // Initial render call to set positions before scroll
+    // We simulate a progress of 0
+    const initialEvent = { progress: 0 };
+    // We can't easily call the onUpdate manually without the self object, 
+    // but the ScrollTrigger will fire on init usually.
 }
