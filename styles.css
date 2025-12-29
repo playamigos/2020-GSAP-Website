@@ -943,6 +943,17 @@ main {
     box-shadow: 0 0 30px var(--tile-color);
 }
 
+.service-tile:hover .tile-icon i {
+    transform: scale(1.2);
+    animation: shakeIcon 0.5s ease-in-out infinite;
+}
+
+@keyframes shakeIcon {
+    0%, 100% { transform: scale(1.2) rotate(0deg); }
+    25% { transform: scale(1.2) rotate(-5deg); }
+    75% { transform: scale(1.2) rotate(5deg); }
+}
+
 .tile-icon {
     font-size: 80px;
     color: var(--tile-color);
@@ -951,6 +962,11 @@ main {
     align-items: center;
     justify-content: center;
     margin: 0;
+    transition: transform 0.3s ease;
+}
+
+.tile-icon i {
+    transition: transform 0.3s ease;
 }
 
 .tile-title {
@@ -1254,6 +1270,7 @@ main {
     animation: pulseArrow 2s infinite;
     flex-shrink: 0;
     width: 80px; /* Fixed width for calculation */
+    pointer-events: none; /* Ensure it doesn't block hover on adjacent tile */
 }
 
 .scroll-hint-arrow i {
