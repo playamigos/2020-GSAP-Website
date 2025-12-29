@@ -947,6 +947,89 @@ function initAboutSection() {
     window.addEventListener('resize', rebuildHomeToAbout);
 }
 
+// Function to create floating icons background for service tiles
+function createFloatingIconsForTiles() {
+    // Define relevant icons for each service category (using valid FontAwesome 5 icons)
+    const serviceIcons = {
+        'Digital Marketing': ['fa-bullseye', 'fa-chart-line', 'fa-rocket', 'fa-trophy', 'fa-dot-circle', 'fa-chart-bar', 'fa-bullhorn', 'fa-envelope'],
+        'Performance Marketing': ['fa-ad', 'fa-coins', 'fa-chart-bar', 'fa-dollar-sign', 'fa-percent', 'fa-money-bill-wave', 'fa-mouse-pointer', 'fa-hand-pointer'],
+        'SEO & Visibility': ['fa-search', 'fa-search-plus', 'fa-globe', 'fa-sitemap', 'fa-link', 'fa-external-link-alt', 'fa-binoculars', 'fa-eye'],
+        'Social Media': ['fa-share-alt', 'fa-users', 'fa-hashtag', 'fa-heart', 'fa-thumbs-up', 'fa-comment', 'fa-retweet', 'fa-user-friends'],
+        'Influencer Partnerships': ['fa-users', 'fa-handshake', 'fa-star', 'fa-crown', 'fa-user-friends', 'fa-bullhorn', 'fa-project-diagram', 'fa-hands-helping'],
+        'Video Production': ['fa-video', 'fa-camera', 'fa-film', 'fa-play-circle', 'fa-ticket-alt', 'fa-compact-disc', 'fa-photo-video', 'fa-images'],
+        'Commercial Films': ['fa-film', 'fa-tv', 'fa-play', 'fa-video', 'fa-camera-retro', 'fa-broadcast-tower', 'fa-play-circle', 'fa-file-video'],
+        'Corporate Stories': ['fa-building', 'fa-briefcase', 'fa-user-tie', 'fa-chart-line', 'fa-handshake', 'fa-landmark', 'fa-city', 'fa-clock'],
+        '2D/3D Animation': ['fa-cube', 'fa-magic', 'fa-palette', 'fa-layer-group', 'fa-bezier-curve', 'fa-vector-square', 'fa-drafting-compass', 'fa-fill-drip'],
+        'AI-Powered Films': ['fa-robot', 'fa-brain', 'fa-microchip', 'fa-network-wired', 'fa-server', 'fa-laptop-code', 'fa-code', 'fa-atom'],
+        'Branding': ['fa-palette', 'fa-paint-brush', 'fa-swatchbook', 'fa-pen-nib', 'fa-stamp', 'fa-certificate', 'fa-award', 'fa-gem'],
+        'Logo & Visual Systems': ['fa-pen-nib', 'fa-pencil-ruler', 'fa-layer-group', 'fa-draw-polygon', 'fa-bezier-curve', 'fa-vector-square', 'fa-icons', 'fa-signature'],
+        'Market Positioning': ['fa-chart-line', 'fa-crosshairs', 'fa-chess', 'fa-compass', 'fa-map-marked-alt', 'fa-location-arrow', 'fa-bullseye', 'fa-route'],
+        'Brand Voice': ['fa-comment-dots', 'fa-comments', 'fa-microphone', 'fa-volume-up', 'fa-bullhorn', 'fa-podcast', 'fa-quote-left', 'fa-envelope'],
+        'Rebranding Suites': ['fa-sync-alt', 'fa-redo', 'fa-magic', 'fa-bolt', 'fa-history', 'fa-star', 'fa-sync', 'fa-recycle']
+    };
+
+    document.querySelectorAll('.service-tile:not(.special-tile)').forEach(tile => {
+        const titleElement = tile.querySelector('.tile-title');
+        if (!titleElement) return;
+        
+        const title = titleElement.textContent.trim();
+        const icons = serviceIcons[title] || ['fa-circle', 'fa-star', 'fa-heart', 'fa-bolt'];
+        
+        // Create container for floating icons
+        const floatingContainer = document.createElement('div');
+        floatingContainer.className = 'tile-floating-icons';
+        
+        // Define hexagon pattern positions around center icon
+        // Center of tile is at 50%, 50%
+        // Tile dimensions: 300px wide, 480px tall (aspect ratio 0.625)
+        const centerX = 50;
+        const centerY = 50;
+        const radius = 20; // Distance from center in percentage (reduced)
+        const aspectRatio = 300 / 480; // Adjust for tile aspect ratio
+        const angleStep = 60; // 360/6 = 60 degrees between each point
+        
+        const hexagonPositions = [];
+        for (let i = 0; i < 6; i++) {
+            const angle = (angleStep * i - 90) * (Math.PI / 180); // -90 to start from top
+            const x = centerX + (radius * Math.cos(angle)) / aspectRatio; // Adjust X for aspect ratio
+            const y = centerY + radius * Math.sin(angle);
+            hexagonPositions.push({ x, y });
+        }
+        
+        // Take first 6 icons (no shuffling to ensure consistency)
+        const selectedIcons = icons.slice(0, 6);
+        
+        // Ensure we have exactly 6 icons (repeat if needed)
+        while (selectedIcons.length < 6) {
+            selectedIcons.push(icons[selectedIcons.length % icons.length]);
+        }
+        
+        // Create 6 floating icons in hexagon pattern
+        hexagonPositions.forEach((pos, i) => {
+            const iconEl = document.createElement('i');
+            const uniqueIcon = selectedIcons[i];
+            iconEl.className = `fas ${uniqueIcon} floating-icon`;
+            
+            // Position at hexagon vertex
+            iconEl.style.left = pos.x + '%';
+            iconEl.style.top = pos.y + '%';
+            iconEl.style.transform = 'translate(-50%, -50%)'; // Center the icon on the point
+            
+            // Controlled size variation (smaller)
+            const size = 16 + Math.random() * 12;
+            iconEl.style.fontSize = size + 'px';
+            
+            // Staggered animation delays
+            iconEl.style.animationDelay = (i * 2) + 's';
+            
+            floatingContainer.appendChild(iconEl);
+        });
+        
+        // Insert at the beginning of the tile (behind other content)
+        tile.insertBefore(floatingContainer, tile.firstChild);
+    });
+}
+
 // Project Section Transition (Now transitions to Services)
 function initProjectSection() {
     // Apply background images to service tiles with data-bg-image
@@ -956,6 +1039,9 @@ function initProjectSection() {
             tile.style.setProperty('--bg-image-url', `url('${bgImage}')`);
         }
     });
+    
+    // Add floating icons background to all service tiles
+    createFloatingIconsForTiles();
     
     // Load portfolio data dynamically
     loadPortfolio().then(() => {

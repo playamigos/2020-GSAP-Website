@@ -973,6 +973,74 @@ main {
     max-width: 80%;
 }
 
+/* Floating Icons Background */
+.tile-floating-icons {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    z-index: 0;
+    pointer-events: none;
+    animation: rotateWheel 120s linear infinite;
+}
+
+@keyframes rotateWheel {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.floating-icon {
+    position: absolute;
+    color: var(--tile-color);
+    opacity: 0.2;
+    font-size: 18px;
+    animation: floatIcon 15s infinite ease-in-out, counterRotate 120s linear infinite;
+    will-change: transform;
+    transition: opacity 0.3s ease;
+}
+
+.floating-icon:nth-child(even) {
+    animation-duration: 18s, 120s;
+}
+
+.floating-icon:nth-child(3n) {
+    animation-duration: 20s, 120s;
+}
+
+.floating-icon:nth-child(4n) {
+    animation-duration: 22s, 120s;
+}
+
+@keyframes floatIcon {
+    0%, 100% {
+        transform: translate(-50%, -50%) translateY(0) scale(1);
+    }
+    25% {
+        transform: translate(-50%, -50%) translateY(-8px) scale(1.1);
+    }
+    50% {
+        transform: translate(-50%, -50%) translateY(-15px) scale(1.15);
+    }
+    75% {
+        transform: translate(-50%, -50%) translateY(-8px) scale(1.1);
+    }
+}
+
+@keyframes counterRotate {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    to {
+        transform: translate(-50%, -50%) rotate(-360deg);
+    }
+}
+
 /* Transition Canvas */
 .transition-canvas {
     position: fixed;
