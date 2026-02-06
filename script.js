@@ -847,6 +847,27 @@ function initHeroSection() {
             });
         });
     });
+
+    // Control video visibility based on home section scroll position
+    const homeVideo = document.getElementById('home-video');
+    const homeSection = document.querySelector('.home-section');
+    
+    if (homeVideo && homeSection) {
+        // Set initial state - video visible at page load
+        gsap.set(homeVideo, { opacity: 1 });
+        
+        ScrollTrigger.create({
+            trigger: homeSection,
+            start: 'top top',
+            end: 'bottom top',
+            onLeave: () => {
+                gsap.to(homeVideo, { opacity: 0, duration: 0.3 });
+            },
+            onEnterBack: () => {
+                gsap.to(homeVideo, { opacity: 1, duration: 0.3 });
+            }
+        });
+    }
 }
 
 // About Section with Scroll Animations
