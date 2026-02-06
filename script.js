@@ -1765,28 +1765,7 @@ async function loadPortfolio() {
             const projectItem = document.createElement('div');
             projectItem.className = 'project-item';
             projectItem.style.backgroundImage = `url('${project.image}')`;
-            projectItem.style.backgroundSize = 'contain';
-            projectItem.style.backgroundPosition = 'center';
             projectItem.style.backgroundColor = bgColor;
-            
-            // Random animation properties for live effect
-            const driftDuration = 12 + Math.random() * 8; // 12-20s
-            const driftDelay = Math.random() * -10; // Start at different points
-            const driftX1 = (Math.random() - 0.5) * 6; // -3% to 3%
-            const driftY1 = (Math.random() - 0.5) * 6;
-            const driftX2 = (Math.random() - 0.5) * 6;
-            const driftY2 = (Math.random() - 0.5) * 6;
-            const driftX3 = (Math.random() - 0.5) * 6;
-            const driftY3 = (Math.random() - 0.5) * 6;
-            
-            projectItem.style.setProperty('--drift-duration', `${driftDuration}s`);
-            projectItem.style.setProperty('--drift-delay', `${driftDelay}s`);
-            projectItem.style.setProperty('--drift-x1', `${driftX1}%`);
-            projectItem.style.setProperty('--drift-y1', `${driftY1}%`);
-            projectItem.style.setProperty('--drift-x2', `${driftX2}%`);
-            projectItem.style.setProperty('--drift-y2', `${driftY2}%`);
-            projectItem.style.setProperty('--drift-x3', `${driftX3}%`);
-            projectItem.style.setProperty('--drift-y3', `${driftY3}%`);
             
             // Store title as data attribute for tooltip
             projectItem.setAttribute('data-title', project.title);
