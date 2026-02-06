@@ -165,6 +165,162 @@ document.addEventListener('DOMContentLoaded', () => {
     // Ensure we're at the top
     window.scrollTo(0, 0);
 
+    // Aggressive video autoplay handling (Safari-compatible)
+    const homeVideo = document.getElementById('home-video');
+    if (homeVideo) {
+        // Safari requires muted to be set BEFORE play attempt
+        homeVideo.muted = true;
+        homeVideo.defaultMuted = true;
+        homeVideo.volume = 0;
+        homeVideo.removeAttribute('controls');
+        homeVideo.controls = false;
+        homeVideo.playsInline = true;
+        homeVideo.setAttribute('playsinline', '');
+        homeVideo.setAttribute('webkit-playsinline', '');
+        homeVideo.setAttribute('x5-playsinline', '');
+        homeVideo.setAttribute('muted', '');
+        homeVideo.setAttribute('autoplay', '');
+        
+        // Safari-specific: Ensure video element is "visible" for autoplay policy
+        homeVideo.style.visibility = 'visible';
+        homeVideo.style.display = 'block';
+        
+        // Force reload with fresh attributes
+        homeVideo.load();
+        
+        const tryPlay = () => {
+            if (homeVideo.paused) {
+                homeVideo.muted = true;
+                const playPromise = homeVideo.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(() => {
+                        // Safari sometimes needs a small delay
+                        setTimeout(() => {
+                            homeVideo.muted = true;
+                            homeVideo.play().catch(() => {});
+                        }, 100);
+                    });
+                }
+            }
+        };
+        
+        // Multiple event listeners for different browser behaviors
+        homeVideo.addEventListener('loadstart', tryPlay, { once: true });
+        homeVideo.addEventListener('loadedmetadata', tryPlay, { once: true });
+        homeVideo.addEventListener('canplay', tryPlay, { once: true });
+        homeVideo.addEventListener('canplaythrough', tryPlay, { once: true });
+        
+        // Immediate play if already loaded
+        if (homeVideo.readyState >= 2) {
+            setTimeout(tryPlay, 100);
+        }
+        
+        // Aggressive retry loop for stubborn browsers
+        let retryCount = 0;
+        const maxRetries = 20;
+        const retryInterval = setInterval(() => {
+            retryCount++;
+            if (!homeVideo.paused || retryCount >= maxRetries) {
+                clearInterval(retryInterval);
+                return;
+            }
+            homeVideo.muted = true;
+            homeVideo.play().catch(() => {});
+        }, 500);
+        
+        // User-interaction fallback (required for Low Power Mode on iOS/Safari)
+        const startOnInteraction = () => {
+            if (homeVideo.paused) {
+                homeVideo.muted = true;
+                homeVideo.play().catch(() => {});
+            }
+        };
+        
+        // Listen to more interaction events including page visibility
+        ['click', 'touchstart', 'touchend', 'touchmove', 'scroll', 'keydown', 'mousemove'].forEach(evt => {
+            document.addEventListener(evt, startOnInteraction, { once: true, passive: true });
+        });
+        
+        // Handle page visibility change (Safari Mobile tab switching)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && homeVideo.paused) {
+                homeVideo.muted = true;
+                homeVideo.play().catch(() => {});
+            }
+        });
+        
+        // Ensure video loops seamlessly
+        homeVideo.addEventListener('ended', () => {
+            homeVideo.currentTime = 0;
+            homeVideo.play().catch(() => {});
+        });
+    }
+
+    // PRODUCTIONS text spring animation
+    const productionsText = document.querySelector('.productions-text');
+    if (productionsText) {
+        productionsText.addEventListener('mouseenter', () => {
+            gsap.to(productionsText, {
+                letterSpacing: '16px',
+                duration: 1.2,
+                ease: 'elastic.out(1, 0.5)'
+            });
+        });
+        
+        productionsText.addEventListener('mouseleave', () => {
+            gsap.to(productionsText, {
+                letterSpacing: '2px',
+                duration: 1.2,
+                ease: 'elastic.out(1, 0.6)'
+            });
+        });
+    }
+
+    // Showreel Video Popup
+    const showreelBtn = document.getElementById('showreel-btn');
+    const videoPopup = document.getElementById('video-popup');
+    const videoPopupClose = document.getElementById('video-popup-close');
+    const videoPopupOverlay = document.getElementById('video-popup-overlay');
+    const showreelIframe = document.getElementById('showreel-iframe');
+    const youtubeVideoId = '_TjIogfxizQ';
+    
+    if (showreelBtn && videoPopup) {
+        // Open popup
+        showreelBtn.addEventListener('click', () => {
+            videoPopup.classList.add('active');
+            // Load YouTube video with autoplay
+            showreelIframe.src = `https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&rel=0`;
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+        });
+        
+        // Close popup function
+        const closePopup = () => {
+            videoPopup.classList.remove('active');
+            // Stop video by removing src
+            showreelIframe.src = '';
+            // Restore body scroll
+            document.body.style.overflow = '';
+        };
+        
+        // Close on close button
+        if (videoPopupClose) {
+            videoPopupClose.addEventListener('click', closePopup);
+        }
+        
+        // Close on overlay click
+        if (videoPopupOverlay) {
+            videoPopupOverlay.addEventListener('click', closePopup);
+        }
+        
+        // Close on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && videoPopup.classList.contains('active')) {
+                closePopup();
+            }
+        });
+    }
+
     // Initialize loading screen first
     initLoadingScreen(() => {
         // Initialize site animations right before loading screen fades out

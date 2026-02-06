@@ -16,6 +16,10 @@
     --header-height: 60px;
 }
 
+html {
+    background-color: var(--bg-dark);
+}
+
 body {
     font-family: "Hanken Grotesk", sans-serif;
     background-color: var(--bg-dark);
@@ -436,7 +440,7 @@ main {
 }
 
 .shapes-spacer {
-    height: 0px;
+    height: 40px;
     width: 100%;
 }
 
@@ -461,6 +465,100 @@ main {
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    clip-path: inset(0);
+}
+
+/* Video Background */
+.home-video-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    filter: brightness(0.6) contrast(1.1);
+    pointer-events: none;
+}
+
+/* Hide ALL video controls and UI elements */
+.home-video-background::-webkit-media-controls {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+.home-video-background::-webkit-media-controls-enclosure {
+    display: none !important;
+    opacity: 0 !important;
+}
+
+.home-video-background::-webkit-media-controls-panel {
+    display: none !important;
+    opacity: 0 !important;
+}
+
+.home-video-background::-webkit-media-controls-play-button {
+    display: none !important;
+    opacity: 0 !important;
+}
+
+.home-video-background::-webkit-media-controls-start-playback-button {
+    display: none !important;
+    opacity: 0 !important;
+}
+
+video::-webkit-media-controls {
+    display: none !important;
+}
+
+video::-webkit-media-controls-enclosure {
+    display: none !important;
+}
+
+/* Dark overlay on video */
+.home-video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Vignette effect - darkness at corners */
+.home-video-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0.3) 60%,
+        rgba(0, 0, 0, 0.7) 100%
+    );
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Pixel Grid Overlay */
+.home-grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(123, 97, 255, 0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(123, 97, 255, 0.2) 1px, transparent 1px);
+    background-size: 4px 4px;
+    z-index: 2;
+    pointer-events: none;
 }
 
 .home-particles {
@@ -471,7 +569,7 @@ main {
     height: 100%;
     opacity: 0.4;
     pointer-events: none;
-    z-index: 1;
+    z-index: 3;
 }
 
 .container {
@@ -489,16 +587,20 @@ main {
     align-items: center;
     justify-content: center;
     height: 100%;
+    position: relative;
+    z-index: 4;
 }
 
 .hero-logo {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 30px;
+    gap: 16px;
     justify-content: center;
     width: 100%;
     transform: translateY(100px);
+    position: relative;
+    z-index: 4;
 }
 
 /* Logo Shapes Container */
@@ -563,15 +665,168 @@ main {
     line-height: 1;
     perspective: 1000px;
     transform-style: preserve-3d;
+    cursor: default;
+    will-change: letter-spacing;
 }
 
 /* Tagline */
 .tagline {
     font-size: 16px;
-    font-weight: 400;
-    color: var(--text-secondary);
+    font-weight: 500;
+    color: var(--text-primary);
     margin: 0;
-    letter-spacing: 0px;
+    letter-spacing: 0.5px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px 24px;
+    border-radius: 50px;
+    backdrop-filter: blur(8px);
+    display: inline-block;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Showreel Button */
+.showreel-btn {
+    background: linear-gradient(135deg, #7B61FF 0%, #5B47CC 100%);
+    color: var(--text-primary);
+    border: none;
+    padding: 14px 32px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border-radius: 50px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(123, 97, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.showreel-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #9B81FF 0%, #7B61FF 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.showreel-btn:hover::before {
+    opacity: 1;
+}
+
+.showreel-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(123, 97, 255, 0.5);
+}
+
+.showreel-btn:active {
+    transform: translateY(0);
+}
+
+.showreel-btn i {
+    font-size: 14px;
+}
+
+/* Video Popup Modal */
+.video-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.video-popup.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.video-popup-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.video-popup-content {
+    position: relative;
+    width: 90%;
+    max-width: 1200px;
+    z-index: 10001;
+    animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.video-popup-close {
+    position: absolute;
+    top: -50px;
+    right: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-primary);
+    font-size: 18px;
+}
+
+.video-popup-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.video-popup-wrapper {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.video-popup-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 /* About Section */

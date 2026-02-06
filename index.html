@@ -129,6 +129,14 @@
         
         <!-- Home Section -->
         <section id="home" class="section home-section">
+            <!-- Background Video -->
+            <video id="home-video" class="home-video-background" muted autoplay loop playsinline webkit-playsinline x5-playsinline preload="auto" disableRemotePlayback disablePictureInPicture>
+                <source src="Videos/Background_reel.mp4" type="video/mp4">
+            </video>
+            <!-- Dark overlay on video -->
+            <div class="home-video-overlay"></div>
+            <!-- Pixel Grid Overlay -->
+            <div class="home-grid-overlay"></div>
             <div class="home-particles"></div>
             <div class="hero-container">
                 <div class="hero-logo">
@@ -140,9 +148,28 @@
                     
                     <!-- Tagline -->
                     <p class="tagline">Bringing Your Vision to Life Through Creative Storytelling</p>
+                    
+                    <!-- Showreel Button -->
+                    <button class="showreel-btn" id="showreel-btn">
+                        <i class="fas fa-play"></i>
+                        <span>Watch Showreel</span>
+                    </button>
                 </div>
             </div>
         </section>
+
+        <!-- Video Popup Modal -->
+        <div class="video-popup" id="video-popup">
+            <div class="video-popup-overlay" id="video-popup-overlay"></div>
+            <div class="video-popup-content">
+                <button class="video-popup-close" id="video-popup-close">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="video-popup-wrapper">
+                    <iframe id="showreel-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
 
         <!-- About Section -->
         <section id="about" class="section about-section">
