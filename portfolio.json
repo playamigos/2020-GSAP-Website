@@ -8,28 +8,28 @@
           "id": "bandi-sanjay-yatra",
           "title": "Bandi Sanjay Praja Sangrama Yatra - Campaign management",
           "description": "Full-scale digital and ground campaign management",
-          "image": "Images/sanjay.jpg",
+          "image": "https://cdn.jsdelivr.net/gh/playamigos/2020-GSAP-Website@main/Images/sanjay.jpg",
           "category": "political"
         },
         {
           "id": "tdp-campaigns",
           "title": "TDP Election Campaigns",
           "description": "Strategy, digital outreach, and high-impact political ad films",
-          "image": "Images/cbn.jpg",
+          "image": "https://cdn.jsdelivr.net/gh/playamigos/2020-GSAP-Website@main/Images/cbn.jpg",
           "category": "political"
         },
         {
           "id": "ap-ipr",
           "title": "Official government Video Films - I&PR",
           "description": "Official government video documentation and public messaging",
-          "image": "Images/inpr.jpg",
+          "image": "https://cdn.jsdelivr.net/gh/playamigos/2020-GSAP-Website@main/Images/inpr.jpg",
           "category": "political"
         },
         {
           "id": "ap-digital-corp",
           "title": "Shoots & Video Production",
           "description": "Modernizing state communication through digital assets and cinematic ad films",
-          "image": "Images/apcrda.jpg",
+          "image": "https://cdn.jsdelivr.net/gh/playamigos/2020-GSAP-Website@main/Images/apcrda.jpg",
           "category": "political"
         }
       ]
@@ -42,28 +42,28 @@
           "id": "etv-win",
           "title": "Social Media Promotions",
           "description": "Comprehensive brand and movie promotion strategies",
-          "image": "Images/etv.jpg",
+          "image": "https://cdn.jsdelivr.net/gh/playamigos/2020-GSAP-Website@main/Images/etv.jpg",
           "category": "entertainment"
         },
         {
           "id": "movie-promotions",
           "title": "Movie Promotions",
           "description": "Digital marketing and content buzz for upcoming theatrical releases",
-          "image": "Images/mahesh.jpg",
+          "image": "https://cdn.jsdelivr.net/gh/playamigos/2020-GSAP-Website@main/Images/mahesh.jpg",
           "category": "entertainment"
         },
         {
           "id": "shekar-master",
           "title": "Shekar Master Social Media",
           "description": "Managing and scaling digital presence for celebrity talent",
-          "image": "Images/shekar.jpg",
+          "image": "https://cdn.jsdelivr.net/gh/playamigos/2020-GSAP-Website@main/Images/shekar.jpg",
           "category": "entertainment"
         },
         {
           "id": "meta-youtube",
           "title": "Meta & YouTube Content Partnership",
           "description": "Direct collaboration for platform-optimized content",
-          "image": "Images/partnerships.jpg",
+          "image": "https://cdn.jsdelivr.net/gh/playamigos/2020-GSAP-Website@main/Images/partnerships.jpg",
           "category": "entertainment"
         }
       ]
@@ -76,28 +76,28 @@
           "id": "3d-animation",
           "title": "3D Animation Channels",
           "description": "High-fidelity 3D storytelling for global YouTube audiences",
-          "image": "Images/cars.jpg",
+          "image": "https://cdn.jsdelivr.net/gh/playamigos/2020-GSAP-Website@main/Images/cars.jpg",
           "category": "animation"
         },
         {
           "id": "2d-animation",
           "title": "2D Animation Series",
           "description": "Creative, character-driven 2D content for specialized niche channels",
-          "image": "Images/spacetalks.jpg",
+          "image": "https://cdn.jsdelivr.net/gh/playamigos/2020-GSAP-Website@main/Images/spacetalks.jpg",
           "category": "animation"
         },
         {
           "id": "ai-content",
           "title": "AI-Generated Content",
           "description": "Utilizing generative AI to produce rapid, futuristic video solutions",
-          "image": "Images/snake.jpg",
+          "image": "https://cdn.jsdelivr.net/gh/playamigos/2020-GSAP-Website@main/Images/snake.jpg",
           "category": "animation"
         },
         {
           "id": "explainer-films",
           "title": "Concept Films",
           "description": "Simplifying complex ideas through motion graphics",
-          "image": "Images/samhara.jpg",
+          "image": "https://cdn.jsdelivr.net/gh/playamigos/2020-GSAP-Website@main/Images/samhara.jpg",
           "category": "animation"
         }
       ]
@@ -110,21 +110,21 @@
           "id": "real-estate",
           "title": "Real Estate Ad Films",
           "description": "Specialized cinematic tours and marketing for property developers",
-          "image": "Images/realestate.jpg",
+          "image": "https://cdn.jsdelivr.net/gh/playamigos/2020-GSAP-Website@main/Images/realestate.jpg",
           "category": "commercial"
         },
         {
           "id": "corporate-stories",
           "title": "Corporate Brand Stories",
           "description": "Professional identity films for businesses across industries",
-          "image": "Images/navya.jpg",
+          "image": "https://cdn.jsdelivr.net/gh/playamigos/2020-GSAP-Website@main/Images/navya.jpg",
           "category": "commercial"
         },
         {
           "id": "performance-ads",
           "title": "Performance Marketing Ads",
           "description": "Conversion-focused video ads for YouTube and Social Media",
-          "image": "Images/cellpoint.jpg",
+          "image": "https://cdn.jsdelivr.net/gh/playamigos/2020-GSAP-Website@main/Images/cellpoint.jpg",
           "category": "commercial"
         }
       ]
