@@ -168,6 +168,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Aggressive video autoplay handling (Safari-compatible)
     const homeVideo = document.getElementById('home-video');
     if (homeVideo) {
+        // Detect Safari
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        
         // Safari requires muted to be set BEFORE play attempt
         homeVideo.muted = true;
         homeVideo.defaultMuted = true;
@@ -179,71 +182,119 @@ document.addEventListener('DOMContentLoaded', () => {
         homeVideo.setAttribute('webkit-playsinline', '');
         homeVideo.setAttribute('x5-playsinline', '');
         homeVideo.setAttribute('muted', '');
-        homeVideo.setAttribute('autoplay', '');
+        
+        // For Safari, don't set autoplay attribute (it's stricter)
+        if (!isSafari) {
+            homeVideo.setAttribute('autoplay', '');
+        }
         
         // Safari-specific: Ensure video element is "visible" for autoplay policy
         homeVideo.style.visibility = 'visible';
         homeVideo.style.display = 'block';
+        homeVideo.style.opacity = '1';
         
-        // Force reload with fresh attributes
-        homeVideo.load();
+        let hasPlayed = false;
         
         const tryPlay = () => {
-            if (homeVideo.paused) {
-                homeVideo.muted = true;
-                const playPromise = homeVideo.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(() => {
-                        // Safari sometimes needs a small delay
-                        setTimeout(() => {
-                            homeVideo.muted = true;
-                            homeVideo.play().catch(() => {});
-                        }, 100);
-                    });
-                }
+            if (hasPlayed && !homeVideo.paused) return;
+            
+            homeVideo.muted = true;
+            const playPromise = homeVideo.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    hasPlayed = true;
+                    console.log('Video playing successfully');
+                }).catch((err) => {
+                    console.log('Play attempt failed:', err.message);
+                    // Retry after a short delay
+                    setTimeout(() => {
+                        homeVideo.muted = true;
+                        homeVideo.play().catch(() => {});
+                    }, 100);
+                });
             }
         };
         
-        // Multiple event listeners for different browser behaviors
-        homeVideo.addEventListener('loadstart', tryPlay, { once: true });
-        homeVideo.addEventListener('loadedmetadata', tryPlay, { once: true });
-        homeVideo.addEventListener('canplay', tryPlay, { once: true });
-        homeVideo.addEventListener('canplaythrough', tryPlay, { once: true });
-        
-        // Immediate play if already loaded
-        if (homeVideo.readyState >= 2) {
-            setTimeout(tryPlay, 100);
+        // Safari-specific: Use IntersectionObserver
+        if (isSafari && 'IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && homeVideo.paused) {
+                        console.log('Video in view, attempting play');
+                        tryPlay();
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            observer.observe(homeVideo);
         }
         
-        // Aggressive retry loop for stubborn browsers
-        let retryCount = 0;
-        const maxRetries = 20;
-        const retryInterval = setInterval(() => {
-            retryCount++;
-            if (!homeVideo.paused || retryCount >= maxRetries) {
-                clearInterval(retryInterval);
-                return;
-            }
-            homeVideo.muted = true;
-            homeVideo.play().catch(() => {});
-        }, 500);
+        // Force reload AFTER setting all attributes
+        homeVideo.load();
         
-        // User-interaction fallback (required for Low Power Mode on iOS/Safari)
-        const startOnInteraction = () => {
+        // Try playing on various load events
+        homeVideo.addEventListener('loadeddata', () => {
+            console.log('Video loaded data');
+            setTimeout(tryPlay, 50);
+        }, { once: true });
+        
+        homeVideo.addEventListener('canplay', () => {
+            console.log('Video can play');
+            setTimeout(tryPlay, 50);
+        }, { once: true });
+        
+        // Try immediately if already buffered
+        setTimeout(() => {
+            if (homeVideo.readyState >= 2) {
+                console.log('Video ready, playing immediately');
+                tryPlay();
+            }
+        }, 100);
+        
+        // Aggressive user-interaction fallback
+        const startOnInteraction = (e) => {
+            console.log('User interaction detected:', e.type);
             if (homeVideo.paused) {
                 homeVideo.muted = true;
-                homeVideo.play().catch(() => {});
+                homeVideo.play().then(() => {
+                    hasPlayed = true;
+                    console.log('Video started via user interaction');
+                }).catch((err) => {
+                    console.log('Failed to start via interaction:', err.message);
+                });
             }
         };
         
-        // Listen to more interaction events including page visibility
-        ['click', 'touchstart', 'touchend', 'touchmove', 'scroll', 'keydown', 'mousemove'].forEach(evt => {
+        // Safari needs immediate response to user interaction
+        const events = isSafari 
+            ? ['click', 'touchstart', 'touchend', 'keydown']
+            : ['click', 'touchstart', 'touchend', 'touchmove', 'scroll', 'keydown', 'mousemove'];
+        
+        events.forEach(evt => {
             document.addEventListener(evt, startOnInteraction, { once: true, passive: true });
         });
         
-        // Handle page visibility change (Safari Mobile tab switching)
+        // Continuous retry for Safari (more persistent)
+        if (isSafari) {
+            let retryCount = 0;
+            const maxRetries = 30; // More retries for Safari
+            const retryInterval = setInterval(() => {
+                retryCount++;
+                if (hasPlayed || !homeVideo.paused || retryCount >= maxRetries) {
+                    clearInterval(retryInterval);
+                    return;
+                }
+                console.log('Retry attempt:', retryCount);
+                homeVideo.muted = true;
+                homeVideo.play().catch(() => {});
+            }, 300); // Faster retries
+        }
+        
+        // Handle page visibility change
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && homeVideo.paused) {
+                console.log('Page visible, attempting play');
                 homeVideo.muted = true;
                 homeVideo.play().catch(() => {});
             }
@@ -254,6 +305,17 @@ document.addEventListener('DOMContentLoaded', () => {
             homeVideo.currentTime = 0;
             homeVideo.play().catch(() => {});
         });
+        
+        // Expose play function globally for debugging
+        window.forcePlayVideo = () => {
+            console.log('Manual play triggered');
+            homeVideo.muted = true;
+            homeVideo.play().then(() => {
+                console.log('Manual play successful');
+            }).catch((err) => {
+                console.log('Manual play failed:', err.message);
+            });
+        };
     }
 
     // PRODUCTIONS text spring animation
